@@ -27,7 +27,15 @@ $config = [
             'assignmentTable' => 'web_auth_assignment',  
             'itemChildTable' => 'web_auth_item_child',  
             'ruleTable'=>'web_auth_rule'  
-        ],  
+        ], 
+        'urlManager' => [
+            'enablePrettyUrl' => true,
+            'enableStrictParsing' => true,
+            'showScriptName' => false,
+            'rules' => [
+                ['class' => 'yii\rest\UrlRule', 'controller' => 'user'],
+            ],
+        ], 
     ],
     'params' => $params,
     /*
