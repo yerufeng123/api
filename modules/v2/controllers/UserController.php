@@ -1,17 +1,13 @@
 <?php
 
-namespace app\controllers;
+namespace app\modules\v2\controllers;
 
 use yii\web\Controller;
 
 class UserController extends Controller
 {
-    public function actionView(){
-    	echo 3333;
-    }
-
     public function actionIndex(){
-    	echo 333;
+    	echo 222;
     }
 
     

@@ -50,10 +50,10 @@ $config = [
         'db' => require(__DIR__ . '/db.php'),
         'urlManager' => [
             'enablePrettyUrl' => true,
-            'enableStrictParsing' => true,
+            //'enableStrictParsing' => true,
             'showScriptName' => false,
             'rules' => [
-                ['class' => 'yii\rest\UrlRule', 'controller' => 'user'],
+              //  ['class' => 'yii\rest\UrlRule', 'controller' => 'user'],
             ],
         ],
 
@@ -69,8 +69,14 @@ $config = [
             'itemChildTable' => 'web_auth_item_child',  
             'ruleTable'=>'web_auth_rule' 
         ],
-        
-        
+    ],
+    'modules' => [
+        'v1' => [
+             'class' => 'app\modules\v1\Module',
+        ],
+        'v2' => [
+              'class' => 'app\modules\v2\Module',
+          ],
     ],
     'params' => $params,
 ];
