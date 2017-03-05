@@ -7,7 +7,7 @@ use yii\web\Controller;
 class UserController extends Controller
 {
     public function actionView(){
-    	echo 3333;
+    	echo 444;
     }
 
     public function actionIndex(){
