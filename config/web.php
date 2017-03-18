@@ -69,14 +69,31 @@ $config = [
             'itemChildTable' => 'web_auth_item_child',  
             'ruleTable'=>'web_auth_rule' 
         ],
+        'assetManager' => [//资源管理器
+            'bundles' => [
+                'yii\web\JqueryAsset' => [
+                    'js' => [
+                        YII_ENV_DEV ? 'jquery.js' : 'jquery.min.js',
+                    ]
+                ],
+            ],
+            'appendTimestamp' => true,//开启可防止前端缓存(静态文件后添加了时间戳)
+            //'linkAssets' => true,//创建一个符号链接到要发布的资源包源路径， 这比拷贝文件方式快
+            //'basePath'=>'',//修改默认发布位置
+            //'baseUrl'=>'',//修改默认发布位置
+        ],
     ],
-    'modules' => [
+    'modules' => [//定义模块
         'v1' => [
              'class' => 'app\modules\v1\Module',
         ],
         'v2' => [
               'class' => 'app\modules\v2\Module',
           ],
+    ],
+    'aliases' => [//定义别名
+        '@cms' => '@web/background',
+        '@cmsroot' => '@webroot/background',
     ],
     'params' => $params,
 ];
