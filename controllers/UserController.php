@@ -2,11 +2,17 @@
 
 namespace app\controllers;
 
-use yii\rest\ActiveController;
+use yii\web\Controller;
 
-class UserController extends ActiveController
+class UserController extends Controller
 {
-    public $modelClass = 'app\models\User';
+    public function actionView(){
+    	echo 444;
+    }
+
+    public function actionIndex(){
+    	echo 333;
+    }
 
     
 }
