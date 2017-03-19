@@ -14,10 +14,10 @@ use yii\web\AssetBundle;
  */
 class BackgroundAsset extends AssetBundle
 {
-    public $basePath = '@cmsroot';
-    public $baseUrl = '@cms';
+    public $basePath = '@webroot/background';
+    public $baseUrl = '@web/background';
     public $css = [
-        'css/site.css',
+        'css/style.default.css',
     ];
     public $js = [
     ];

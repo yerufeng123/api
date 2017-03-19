@@ -91,10 +91,6 @@ $config = [
               'class' => 'app\modules\v2\Module',
           ],
     ],
-    'aliases' => [//定义别名
-        '@cms' => '@web/background',
-        '@cmsroot' => '@webroot/background',
-    ],
     'params' => $params,
 ];
 
