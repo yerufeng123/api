@@ -20,6 +20,12 @@ class BackgroundAsset extends AssetBundle
         'css/style.default.css',
     ];
     public $js = [
+        //"js/plugins/jquery-1.7.min.js",
+        'js/plugins/jquery-ui-1.8.16.custom.min.js',
+        'js/plugins/jquery.cookie.js',
+        'js/plugins/jquery.uniform-2.2.2.min.js',
+        'js/custom/general.js',
+        'js/custom/index.js',
     ];
     public $depends = [
         'yii\bootstrap\BootstrapPluginAsset',

@@ -16,7 +16,7 @@ $config = [
         ],
         'user' => [
             'identityClass' => 'app\models\User',
-            'enableAutoLogin' => true,
+            //'enableAutoLogin' => true,
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',
@@ -77,7 +77,7 @@ $config = [
                     ]
                 ],
             ],
-            'appendTimestamp' => true,//开启可防止前端缓存(静态文件后添加了时间戳)
+            'appendTimestamp' => false,//开启可防止前端缓存(静态文件后添加了时间戳)
             //'linkAssets' => true,//创建一个符号链接到要发布的资源包源路径， 这比拷贝文件方式快
             //'basePath'=>'',//修改默认发布位置
             //'baseUrl'=>'',//修改默认发布位置
