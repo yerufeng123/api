@@ -16,7 +16,8 @@ $config = [
         ],
         'user' => [
             'identityClass' => 'app\models\User',
-            //'enableAutoLogin' => true,
+            'enableAutoLogin' => true,
+            'loginUrl' => ['login/index'],
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',
@@ -57,11 +58,11 @@ $config = [
             ],
         ],
 
-        'session' => [
-            'class' => 'yii\web\DbSession',
-            // 'db' => 'mydb',  // 数据库连接的应用组件ID，默认为'db'.
-            'sessionTable' => 'my_session', // session 数据表名，默认为'session'.
-        ],
+        // 'session' => [
+        //     'class' => 'yii\web\DbSession',
+        //     // 'db' => 'mydb',  // 数据库连接的应用组件ID，默认为'db'.
+        //     'sessionTable' => 'my_session', // session 数据表名，默认为'session'.
+        // ],
         'authManager' => [
             'class' => 'yii\rbac\DbManager',  
             'itemTable' => 'web_auth_item',  

@@ -19,7 +19,7 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public static function findIdentity($id)
     {
-        return static::findOne($id);
+        //return static::findOne($id);
     }
 
     /**
@@ -30,7 +30,7 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        return static::findOne(['access_token' => $token]);
+        //return static::findOne(['access_token' => $token]);
     }
 
     /**
