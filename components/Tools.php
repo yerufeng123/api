@@ -1,6 +1,8 @@
 <?php
 namespace app\components;
 
+use Yii;
+
 /**
  *工具类
  * @author gaoxiangdong<gxd_dnjlw@163.com>
@@ -13,15 +15,20 @@ class Tools
   /**
    *
    */	
-  public static function returnSuc(){
-
+  public static function returnSuc($data=array()){
+    self::returnRes(0,'success',$data);
   }
 
-  public static function returnErr(){
-
+  public static function returnErr($code,$message){
+    self::returnRes($code,$message);
   }
 
-  public static function returnRes(){
-  	
+  public static function returnRes($code,$message,$data=array()){
+    Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+    Yii::$app->response->data=[
+      'code'=>$code,
+      'msg'=>$message,
+      'data'=>$data,
+    ];
   }
 }

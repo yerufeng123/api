@@ -5,6 +5,7 @@ namespace app\controllers;
 use Yii;
 use yii\web\Controller;
 use app\models\User;
+use app\components\Tools;
 
 /**
  * 登录控制器（唯一不需要继承Base控制器）
@@ -24,10 +25,7 @@ class LoginController extends Controller
      *登录-接口
      */
     public function actionLoginin(){
-        Yii::$app->response->headers->add('Pragmassss', 'no-cache');
-        Yii::$app->response->format = \yii\web\Response::FORMAT_JSONP;
-        Yii::$app->response->content = 'ceshi neirong';
-        Yii::$app->response->data=['message' => 'hello world'];
+        Tools::returnSuc(array('nihao'=>'hahah','wwoo'=>'sdfsdf'));
         // $model=new User;
         // //接收用户输入的账号和密码
         //     $model->load(Yii::$app->request->post());
