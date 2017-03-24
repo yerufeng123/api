@@ -24,10 +24,24 @@ class LoginController extends Controller
      *登录-接口
      */
     public function actionLoginin(){
-        Yii::$app->response->headers->add('Pragmassss', 'no-cache');
-        Yii::$app->response->format = \yii\web\Response::FORMAT_JSONP;
-        Yii::$app->response->content = 'ceshi neirong';
-        Yii::$app->response->data=['message' => 'hello world'];
+        ob_end_flush();
+        for($i = 1; $i <= 3000; $i++ ) print(" ");
+        // 这一句话非常关键，cache的结构使得它的内容只有达到一定的大小才能从浏览器里输出
+        // 换言之，如果cache的内容不达到一定的大小，它是不会在程序执行完毕前输出的。经
+        // 过测试，我发现这个大小的底限是256个字符长。这意味着cache以后接收的内容都会
+        // 源源不断的被发送出去。
+        For($j = 1; $j <= 20; $j++) {
+        echo $j."
+        ";
+        flush(); //这一部会使cache新增的内容被挤出去，显示到浏览器上
+        sleep(1); //让程序"睡"一秒钟，会让你把效果看得更清楚
+        }
+
+
+        // Yii::$app->response->headers->add('Pragmassss', 'no-cache');
+        // Yii::$app->response->format = \yii\web\Response::FORMAT_JSONP;
+        // Yii::$app->response->content = 'ceshi neirong';
+        // Yii::$app->response->data=['message' => 'hello world'];
         // $model=new User;
         // //接收用户输入的账号和密码
         //     $model->load(Yii::$app->request->post());
