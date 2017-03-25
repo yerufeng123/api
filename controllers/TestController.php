@@ -4,12 +4,12 @@ namespace app\controllers;
 
 use Yii;
 use app\models\Test;
-use yii\web\Controller;
+use app\components\BaseController;
 
 /**
  * CountryController implements the CRUD actions for Country model.
  */
-class TestController extends Controller
+class TestController extends BaseController
 {
     public function actionTestLog(){
         echo '开始';

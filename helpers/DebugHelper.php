@@ -13,16 +13,12 @@ use app\helpers\ToolsHelper;
 /**
  *
  */
-class Debug
+class DebugHelper
 {
   private  $STARTTIME=0;//毫秒级时间戳
   private  $ENDTIME=0;//毫秒级时间戳
   private  $_debug=array();//调试数据
   private  $debugObj;//debug单例
-
-  private function __construct(){
-
-  }
 
   public static function getInstance(){
     if(!$debugObj){
@@ -34,7 +30,7 @@ class Debug
   /**
    *添加debug
    */	
-  private  function addDebug($value){
+  public function addDebug($value){
     $this->_debug[]=$value;
     return $this;
   }
@@ -42,7 +38,7 @@ class Debug
   /**
    *获取debug
    */ 
-  private  function getDebug(){
+  public function getDebug(){
     if($this->validateDebug()){
       return $_debug;
     }
@@ -52,11 +48,11 @@ class Debug
   /**
    *校验debug
    */
-  private  function validateDebug(){
+  public function validateDebug(){
   	$debug=ToolsHelper::getYP('debug');
     $debugConfig=ToolsHelper::getYP('debugConfig',4);
 
-    if($debug && ToolsHelper::decodePwd($debug) == $debugConfig['debugKey']){
+    if($debug && ToolsHelper::decodePwd($debug,'',$debugConfig['debugName']) == $debugConfig['debugKey']){
       return true;
     }
     return false;

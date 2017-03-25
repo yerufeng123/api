@@ -3,13 +3,13 @@
 namespace app\models;
 
 use Yii;
-use yii\base\Model;
+use app\components\BaseModel;
 use yii\base\Event;
 
 /**
  * ContactForm is the model behind the contact form.
  */
-class Test extends Model
+class Test extends BaseModel
 {
     const EVENT_HELLO="helloword";
 

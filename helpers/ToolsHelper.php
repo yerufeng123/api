@@ -37,67 +37,6 @@ class ToolsHelper
   /*
    * ************************************************************
    *
-   * 以js谈框的形式，返回传入的信息
-   * @param string $str 要提示的错误信息
-   * @param string $url 要跳转的连接地址：可为绝对地址，或者相对地址
-   * @return string 返回的js代码
-   * @access public
-   *
-   * ***********************************************************
-   */
-  public static returnJs($str, $url = '')
-  {
-      if ($url) {
-          echo '<script>alert("' . $str . '");window.location.href="' . $url . '";</script>';
-      } else {
-          echo '<script>alert("' . $str . '");window.history.back();</script>';
-      }
-      exit();
-  }
-
-  /*
-   * ************************************************************
-   *
-   * 以json形式，返回传入的信息
-   * @param mixed $data 要提示的错误信息(字符串，可支持数组)
-   * @param string $code 信息代码，正确时为10000，错误请传入错误码
-   * @param integer $type 输出类型 1：输出并终止程序 2：输出但不终止程序3:返回结果
-   * @return string 返回的json字符串
-   * @access public
-   *
-   * ***********************************************************
-   */
-  public static returnJson($data, $code = '10000', $type = 1)
-  {
-      /**
-       * 1开头是系统错误码，业务错误码，从2开始
-       * 10000 操作已完成
-       * 10001 操作失败
-       * 10002 校验错误
-       * 10003 请求的必要参数缺失
-       * 10004 请求参数长度超出限制
-       */
-      $arr = array(
-          'code' => $code,
-          'result' => $data
-      );
-      switch ($type) {
-          case 1:
-              echo TJSON($arr);
-              exit();
-              break;
-          case 2:
-              echo TJSON($arr);
-              break;
-          default:
-              return TJSON($arr);
-              exit();
-      }
-  }
-
-  /*
-   * ************************************************************
-   *
    * 项目密码的加密
    * 备注：在此处可以修改加密规则，如果需要账号和密码进行关联，请传入账号，不需要可以不传(此方法不可逆转)
    * @param string $password 要加密的密码
@@ -108,7 +47,7 @@ class ToolsHelper
    *
    * ***********************************************************
    */
-  public static setPwd($password, $username = '', $string = 'ganrao')
+  public static function setPwd($password, $username = '', $string = 'ganrao')
   {
       return empty($username) ? 
              md5($string . $password) : 
@@ -128,7 +67,7 @@ class ToolsHelper
    *
    * ***********************************************************
    */
-  public static encodePwd($password, $username = '', $string = 'ganrao')
+  public static function encodePwd($password, $username = '', $string = 'ganrao')
   {
       return empty($username) ? 
              base64_encode($string . $password) : 
@@ -148,7 +87,7 @@ class ToolsHelper
    *
    * ***********************************************************
    */
-  public static decodePwd($encodepassword, $username = '', $string = 'ganrao')
+  public static function decodePwd($encodepassword, $username = '', $string = 'ganrao')
   {
       return empty($username) ? 
              substr(base64_decode($encodepassword),strlen($string)) : 
@@ -167,7 +106,7 @@ class ToolsHelper
    *
    * ***********************************************************
    */
-  public static setGaoPwd($str, $type = 1)
+  public static function setGaoPwd($str, $type = 1)
   {
       $len = strlen($str);
       $newstr = '';
@@ -310,17 +249,17 @@ class ToolsHelper
    *
    * ***********************************************************
    */
-  public static getYS($param)
+  public static function getYS($param)
   {
       return Yii::app()->session[$param];
   }
 
-  public static setYS($param, $value)
+  public static function setYS($param, $value)
   {
       Yii::app()->session[$param] = $value;
   }
 
-  public static unsetYS($param)
+  public static function unsetYS($param)
   {
       unset(Yii::app()->session[$param]);
   }
@@ -337,20 +276,20 @@ class ToolsHelper
    *
    * ***********************************************************
    */
-  public static getYC($param)
+  public static function getYC($param)
   {
       $cookie = Yii::app()->request->getCookies();
       return $cookie[$param]->value;
   }
 
-  public static setYC($param, $value, $expire = 604800)
+  public static function setYC($param, $value, $expire = 604800)
   {
       $cookie = new CHttpCookie($param, json_encode($value));
       $cookie->expire = time() + $expire; // 有限期30天
       Yii::app()->request->cookies[$param] = $cookie;
   }
 
-  public static unsetYC($param)
+  public static function unsetYC($param)
   {
       $cookie = Yii::app()->request->getCookies();
       unset($cookie[$param]);
@@ -361,23 +300,30 @@ class ToolsHelper
    *
    * yii框架 获取参数
    * @param string $param 要获取的参数名
-   * @param string $type 要获取的类型1：get参数 2：post参数 3：get和post参数 4:配置文件中
+   * @param string $mode 要获取的类型1：get参数 2：post参数 3：get和post参数 4:配置文件中
+   * @param string $default 默认值
+   * @param string $type 强转类型
    * @return mix
    * @access public
    *
    * ***********************************************************
    */
-  public static getYP($param,$mode = 3,$default=null,$type=null)
+  public static function getYP($param,$mode = 3,$default=null,$type=null)
   {
       $res=null;
       if ($mode == 1) {
-          $res=Yii::app->request->get($param,$default);
+          $res=Yii::$app->request->get($param,$default);
       } elseif ($mode == 2) {
-          $res=Yii::app->request->post($param,$default);
+          $res=Yii::$app->request->post($param,$default);
       } elseif($mode == 4){
-          $res=isset(Yii::app->params[$param]) ? Yii::app->params[$param] : $default;
+          /**
+           *@todo Yii::$app->params可能不让放isset里，回头检查一下
+           */
+          $res=isset(Yii::$app->params[$param]) ? Yii::$app->params[$param] : $default;
       }else{
-          $res=Yii::app->request->getBodyParam($param,$default);
+          $get=Yii::$app->request->get($param);
+          $post=Yii::$app->request->post($param);
+          $res=$post ? $post : $get ? $get : $default;
       }
 
       if($res && $type){
@@ -385,13 +331,39 @@ class ToolsHelper
           return $res*1;
         }elseif(strtolower($type) == 'str' || strtolower($type) == 'string'){
           return (string)$res;
-        }else{
-          return $res;
         }
       }
+      return $res;
   }
 
-  public static getImage($url, $filename = '', $type = 0)
+  /*
+   * ************************************************************
+   *
+   * yii框架 获取参数数组
+   * @param string $mode 要获取的类型1：get参数 2：post参数 3：get和post参数 4:配置文件中
+   * @return array
+   * @access public
+   *
+   * ***********************************************************
+   */
+  public static function getYPS($mode = 3)
+  {
+      $res=[];
+      if ($mode == 1) {
+          $res=Yii::$app->request->get();
+      } elseif ($mode == 2) {
+          $res=Yii::$app->request->post();
+      } elseif($mode == 4){
+          $res=Yii::$app->params;
+      }else{
+          $get=Yii::$app->request->get();
+          $post=Yii::$app->request->post();
+          $res=array_merge($get,$post);
+      }
+      return $res;
+  }
+
+  public static function getImage($url, $filename = '', $type = 0)
   {
       if ($url == '') {
           return false;
@@ -435,7 +407,7 @@ class ToolsHelper
    *
    * ***********************************************************
    */
-  public static getBrowserStyle()
+  public static function getBrowserStyle()
   {
       if (stripos($_SERVER['HTTP_USER_AGENT'], "android") != false) {
           return 'android';
@@ -470,7 +442,7 @@ class ToolsHelper
    *
    * ***********************************************************
    */
-  public static setArrSort($arr, $keys, $type = 'asc')
+  public static function setArrSort($arr, $keys, $type = 'asc')
   {
       $keysvalue = $new_array = array();
       foreach ($arr as $k => $v) {

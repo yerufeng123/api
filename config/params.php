@@ -5,6 +5,5 @@ return [
     'debugConfig'=>[//debug调试配置
     	'debugName'    => 'api-auth-manage',
     	'debugKey'     => '1490343047',
-    ];
-    
+    ],
 ];

@@ -3,9 +3,9 @@
 namespace app\models;
 
 use Yii;
-use yii\base\Model;
+use app\components\BaseModel;
 
-class EntryForm extends Model
+class EntryForm extends BaseModel
 {
     public $name;
     public $email;
