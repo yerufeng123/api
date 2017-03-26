@@ -26,6 +26,7 @@ class LoginController extends Controller
      */
     public function actionLoginin(){
         Tools::returnSuc(array('nihao'=>'hahah','wwoo'=>'sdfsdf'));
+
         // $model=new User;
         // //接收用户输入的账号和密码
         //     $model->load(Yii::$app->request->post());
