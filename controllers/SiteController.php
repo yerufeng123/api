@@ -63,7 +63,7 @@ class SiteController extends BaseController
     public function actionIndex()
     {
         //echo ToolsHelper::encodePwd('1490343047','','api-auth-manage');die;
-        //return $this->render('index');
+        return $this->render('index');
     }
 
     /**

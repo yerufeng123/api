@@ -18,13 +18,15 @@ class DebugHelper
   private  $STARTTIME=0;//毫秒级时间戳
   private  $ENDTIME=0;//毫秒级时间戳
   private  $_debug=array();//调试数据
-  private  $debugObj;//debug单例
+  private  static $debugObj;//debug单例
+
+  private function __construct(){}
 
   public static function getInstance(){
-    if(!$debugObj){
-      $debugObj=new self();
+    if(!self::$debugObj){
+      self::$debugObj=new self();
     }
-    return $debugObj;
+    return self::$debugObj;
   }
   
   /**
