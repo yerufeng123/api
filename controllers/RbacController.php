@@ -2,9 +2,9 @@
 namespace app\controllers;
 
 use Yii;
-use yii\console\Controller;
+use app\components\BaseController;
 
-class RbacController extends Controller
+class RbacController extends BaseController
 {
     public function actionInit()
     {

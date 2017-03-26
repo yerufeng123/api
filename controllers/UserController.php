@@ -2,9 +2,9 @@
 
 namespace app\controllers;
 
-use yii\web\Controller;
+use app\components\BaseController;
 
-class UserController extends Controller
+class UserController extends BaseController
 {
     public function actionView(){
     	echo 444;

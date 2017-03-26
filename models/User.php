@@ -1,10 +1,10 @@
 <?php
 namespace app\models;
 
-use yii\db\ActiveRecord;
+use app\components\BaseActiveRecord;
 use yii\web\IdentityInterface;
 
-class User extends ActiveRecord implements IdentityInterface
+class User extends BaseActiveRecord
 {
     public static function tableName()
     {
