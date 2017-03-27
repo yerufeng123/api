@@ -7,12 +7,6 @@ use app\components\BaseController;
 class UserController extends BaseController
 {
     public function actionView(){
-    	echo 444;
+    	return $this->renderPartial('view');
     }
-
-    public function actionIndex(){
-    	echo 333;
-    }
-
-    
 }

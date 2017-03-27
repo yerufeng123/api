@@ -19,16 +19,15 @@ class HttpUtil extends BaseComponent
    * ***********************************************************
    */
     public static function curl($url,$params,$method='GET'){
+        $timestamp=microtime(true)*10000;
+        $starttime=microtime(true);
         if($method == 'POST'){
-            $starttime=microtime(true);
             $res=self::http_post($url,$params);
-            $endtime=microtime(true);
         }else{
             $sendurl=$url.'?'.http_build_query(array_map('urlencode',$params));
-            $starttime=microtime(true);
             $res=self::http_get($sendurl);
-            $endtime=microtime(true);
         }
+        $endtime=microtime(true);
         
         $data=[
             'http_action'  => $method,
@@ -39,6 +38,7 @@ class HttpUtil extends BaseComponent
                 'errmsg'=>self::$errorMsg,
             ],
             'http_runtime' => $endtime - $starttime,
+            'timestamp'     => $timestamp,
         ];
         DebugHelper::getInstance()->addDebug($data);
     }

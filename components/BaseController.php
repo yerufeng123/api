@@ -15,18 +15,23 @@ use app\helpers\ToolsHelper;
 
 class BaseController extends Controller
 {
-	private $operate_starttime=0;
-	private $operate_endtime=0;
-	private $operate_params=[];
-	private $operate_data=[];
+	private $operate_starttime=0;//debug开始时间
+	private $operate_endtime=0;//debug结束时间
+    private $operate_timestamp=0;//该操作执行时间，用于排序
+	private $operate_params=[];//debug参数
+	private $operate_data=[];//debug数据
 	private $response;
+    private $model;//代理模型
 
 	public function beforeAction($action){
+        $this->response=Yii::$app->response;
 		if(DebugHelper::getInstance()->validateDebug()){
+            $this->operate_timestamp=microtime(true)*10000;
 			$this->operate_starttime=microtime(true);
 			$this->operate_params=ToolsHelper::getYPS();
+            unset($this->operate_params['debug']);
+            $this->response->format=Response::FORMAT_JSON;
 		}
-		$this->response=Yii::$app->response;
         return parent::beforeAction($action);
 	}
 
@@ -38,13 +43,13 @@ class BaseController extends Controller
 	    		'operate_module'     => Yii::$app->controller->module->id,
 	    		'operate_controller'     => Yii::$app->controller->id,
 	            'operate_action'  => Yii::$app->controller->action->id,
-	            'operate_params'  => $operate_params,
-	            'operate_result'  => $operate_data,
+	            'operate_params'  => $this->operate_params,
+	            'operate_result'  => $this->operate_data,
 	            'operate_extension'  => [],
 	            'operate_runtime' => $this->operate_endtime - $this->operate_starttime,
+                'timestamp'     => $this->operate_timestamp,
 	        ];
-	        DebugHelper::getInstance()->addDebug($data);
-	        $this->response->data['debug']=DebugHelper::getInstance()->getDebug();
+	        $this->response->data['debug']=DebugHelper::getInstance()->addDebug($data)->getDebug();
 		}
         return parent::afterAction($action,$result);
 	}
@@ -71,6 +76,59 @@ class BaseController extends Controller
     	foreach ($header as $key => $value) {
     		$this->response->headers->set($key,$value);
     	}
+    }
+
+    //覆写render方法，添加debug
+    public function render($view, $params = [])
+    {
+        if(!DebugHelper::getInstance()->validateDebug()){
+            return parent::render($view, $params);
+        }
+    }
+
+    //覆写renderPartial方法，添加debug
+    public function renderPartial($view, $params = [])
+    {
+        if(!DebugHelper::getInstance()->validateDebug()){
+            return parent::renderPartial($view, $params);
+        }
+    }
+
+    //获取Model模型
+    public function setModel($modelobj){
+        $this->model= $modelobj;
+        return $this;
+    }
+
+    //代理方法
+    public function __call($name,$array){
+        $timestamp=microtime(true)*10000;
+        $starttime=microtime(true);
+        if(!is_callable([$this->model,$name])){
+            return null;//返回这个表示内部模型名称对象不正确，不能正常实例化
+        }
+        try {
+            $res=call_user_func_array(array($this->model,$name), $array);
+            /**
+             *@todo 下列捕捉yii 错误的方式是否兼容yii
+             */
+        } catch (\Exception $e) {
+            $res = false;
+        }
+        $endtime=microtime(true);
+        if(DebugHelper::getInstance()->validateDebug()){
+            //添加debug
+            $data=[
+                'model_action'  => $name,
+                'model_params'  => $array,
+                'model_result'  => $res,
+                'model_extension'  => [],
+                'model_runtime' => $endtime - $starttime,
+                'timestamp'     => $timestamp,
+            ];
+            $this->response->data['debug']=DebugHelper::getInstance()->addDebug($data)->getDebug();
+        }
+        return $res;
     }
 
     private function _getFormat($format){

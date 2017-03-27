@@ -9,6 +9,7 @@ namespace app\helpers;
 
 use Yii;
 use app\helpers\ToolsHelper;
+use yii\helpers\ArrayHelper;
 
 /**
  *
@@ -42,7 +43,8 @@ class DebugHelper
    */ 
   public function getDebug(){
     if($this->validateDebug()){
-      return $_debug;
+      ArrayHelper::multisort($this->_debug, 'timestamp', SORT_ASC);
+      return $this->_debug;
     }
     return [];
   }
