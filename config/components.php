@@ -77,4 +77,15 @@ return [
         //'basePath'=>'',//修改默认发布位置
         //'baseUrl'=>'',//修改默认发布位置
     ],
+    'view' => [//视图组件
+        'theme' => [
+            'basePath' => '@app/themes/basic',
+            'baseUrl' => '@web/themes/basic',
+            'pathMap' => [
+                '@app/views' => '@app/themes/basic',
+                //'@app/modules' => '@app/themes/basic/modules',//主题话模块
+            ],
+        ],
+    ],
+
 ];

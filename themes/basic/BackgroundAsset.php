@@ -4,7 +4,7 @@
  * @author gaoxiangdong<gxd_dnjlw@163.com>
  */
 
-namespace app\assets;
+namespace app\themes\basic\login;
 
 use yii\web\AssetBundle;
 
@@ -14,8 +14,8 @@ use yii\web\AssetBundle;
  */
 class BackgroundAsset extends AssetBundle
 {
-    public $basePath = '@webroot/background';
-    public $baseUrl = '@web/background';
+    public $basePath = '@app/themes/asssets';
+    public $baseUrl = '@web/themes/asssets';
     public $css = [
         'css/style.default.css',
     ];
