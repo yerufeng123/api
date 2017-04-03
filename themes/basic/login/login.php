@@ -1,6 +1,6 @@
 <?php
 use yii\helpers\Html;
-use app\assets\BackgroundAsset;
+use app\themes\basic\BackgroundAsset;
 
 /* @var $this \yii\web\View */
 /* @var $content string */
