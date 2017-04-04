@@ -17,13 +17,13 @@ BackgroundAsset::register($this);
 	<meta charset="<?= Yii::$app->charset ?>">
 	<title><?= Html::encode($this->title)?></title>
 	<!--[if IE 9]>
-	    <link rel="stylesheet" media="screen" href="<?= Yii::getAlias('@web/background') ?>/css/style.ie9.css"/>
+	    <link rel="stylesheet" media="screen" href="<?= Yii::getAlias('@web') ?>/css/style.ie9.css"/>
 	<![endif]-->
 	<!--[if IE 8]>
-	    <link rel="stylesheet" media="screen" href="<?= Yii::getAlias('@web/background') ?>/css/style.ie8.css"/>
+	    <link rel="stylesheet" media="screen" href="<?= Yii::getAlias('@web') ?>/css/style.ie8.css"/>
 	<![endif]-->
 	<!--[if lt IE 9]>
-		<script src="<?= Yii::getAlias('@web/background') ?>/js/plugins/css3-mediaqueries.js"></script>
+		<script src="<?= Yii::getAlias('@web') ?>/js/plugins/css3-mediaqueries.js"></script>
 	<![endif]-->
 	<?php $this->head() ?>
 	</head>
@@ -46,7 +46,7 @@ BackgroundAsset::register($this);
             <div class="nopassword">
 				<div class="loginmsg">密码不正确.</div>
                 <div class="loginf">
-                    <div class="thumb"><img alt="" src="<?= Yii::getAlias('@web/background') ?>/images/thumbs/avatar1.png" /></div>
+                    <div class="thumb"><img alt="" src="<?= Yii::getAlias('@web') ?>/images/thumbs/avatar1.png" /></div>
                     <div class="userlogged">
                         <h4></h4>
                         <a href="index.html">Not <span></span>?</a> 
