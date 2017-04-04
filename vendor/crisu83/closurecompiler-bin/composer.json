@@ -1,0 +1,31 @@
+{
+    "name": "crisu83/closurecompiler-bin",
+    "description": "The Closure Compiler is a tool for making JavaScript download and run faster. It is a true compiler for JavaScript. Instead of compiling from a source language to machine code, it compiles from JavaScript to better JavaScript. It parses your JavaScript, analyzes it, removes dead code and rewrites and minimizes what's left. It also checks syntax, variable references, and types, and warns about common JavaScript pitfalls. Packaged for composer.",
+    "keywords": [ "google", "closure", "compiler", "binary", "javascript", "minification", "minify", "compress" ],
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Google Inc.",
+            "homepage": "https://developers.google.com/closure/compiler/"
+        },
+        {
+            "name": "Package Maintainer",
+            "email": "kaiwa@20minutemail.com",
+            "role": "maintainer"
+        },
+        {
+            "name": "Christoffer Niska",
+            "email": "christoffer.niska@gmail.com",
+            "homepage": "http://www.cniska.net"
+        }
+    ],
+    "support": {
+        "issues": "http://code.google.com/p/closure-compiler/issues",
+        "wiki": "http://code.google.com/p/closure-compiler/w/list",
+        "source": "http://code.google.com/p/closure-compiler/source/browse"
+    },
+    "require": {
+
+    },
+    "bin": [ "build/compiler.jar" ]
+}

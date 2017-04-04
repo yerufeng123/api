@@ -3213,5 +3213,87 @@
             "jQuery UI",
             "yii2"
         ]
+    },
+    {
+        "name": "nervo/yuicompressor",
+        "version": "2.4.8",
+        "version_normalized": "2.4.8.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/nervo/yuicompressor.git",
+            "reference": "e6e3b215c3998cf6092613c002ae533ae75d7ada"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://files.phpcomposer.com/files/nervo/yuicompressor/e6e3b215c3998cf6092613c002ae533ae75d7ada.zip",
+            "reference": "e6e3b215c3998cf6092613c002ae533ae75d7ada",
+            "shasum": ""
+        },
+        "time": "2013-09-13T10:26:14+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "BSD"
+        ],
+        "description": "YUI Compressor is an open source tool that supports the compression of both JavaScript and CSS files. The JavaScript compression removes comments and white-spaces as well as obfuscates local variables using the smallest possible variable name. CSS compression is done using a regular-expression-based CSS minifier.",
+        "homepage": "https://github.com/yui/yuicompressor",
+        "keywords": [
+            "java",
+            "yui"
+        ]
+    },
+    {
+        "name": "crisu83/closurecompiler-bin",
+        "version": "1.0.0",
+        "version_normalized": "1.0.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/Crisu83/closurecompiler-bin.git",
+            "reference": "5e2a31710f319642d8c04d03ce627d363e92445b"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://files.phpcomposer.com/files/Crisu83/closurecompiler-bin/5e2a31710f319642d8c04d03ce627d363e92445b.zip",
+            "reference": "5e2a31710f319642d8c04d03ce627d363e92445b",
+            "shasum": ""
+        },
+        "time": "2013-07-23T19:46:34+00:00",
+        "bin": [
+            "build/compiler.jar"
+        ],
+        "type": "library",
+        "installation-source": "dist",
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "Apache-2.0"
+        ],
+        "authors": [
+            {
+                "name": "Christoffer Niska",
+                "email": "christoffer.niska@gmail.com",
+                "homepage": "http://www.cniska.net/"
+            },
+            {
+                "name": "Krusty Kode",
+                "email": "kaiwa@20minutemail.com",
+                "role": "maintainer"
+            },
+            {
+                "name": "Google Inc.",
+                "homepage": "https://developers.google.com/closure/compiler/"
+            }
+        ],
+        "description": "The Closure Compiler is a tool for making JavaScript download and run faster. It is a true compiler for JavaScript. Instead of compiling from a source language to machine code, it compiles from JavaScript to better JavaScript. It parses your JavaScript, analyzes it, removes dead code and rewrites and minimizes what's left. It also checks syntax, variable references, and types, and warns about common JavaScript pitfalls. Packaged for composer.",
+        "keywords": [
+            "binary",
+            "closure",
+            "compiler",
+            "compress",
+            "google",
+            "javascript",
+            "minification",
+            "minify"
+        ]
     }
 ]
