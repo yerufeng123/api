@@ -19,8 +19,8 @@
         "yiisoft/yii2-bootstrap": "~2.0.0",
         "yiisoft/yii2-swiftmailer": "~2.0.0",
         "yiisoft/yii2-jui": "~2.0.0",
-        "nervo/yuicompressor": "~2.4.8",
-        "crisu83/closurecompiler-bin": "~1.0.0"
+        "nervo/yuicompressor": "~2.4.8",//临时压缩工具
+        "crisu83/closurecompiler-bin": "~1.0.0"//临时压缩工具
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",

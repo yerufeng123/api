@@ -1,12 +1,14 @@
 <?php
 use yii\helpers\Html;
+use yii\web\JqueryAsset;
 use app\themes\basic\BackgroundAsset;
+
 
 /* @var $this \yii\web\View */
 /* @var $content string */
 
 $this->title='登录页';
-
+JqueryAsset::register($this);
 BackgroundAsset::register($this);
 ?>
 
@@ -46,7 +48,7 @@ BackgroundAsset::register($this);
             <div class="nopassword">
 				<div class="loginmsg">密码不正确.</div>
                 <div class="loginf">
-                    <div class="thumb"><img alt="" src="<?= Yii::getAlias('@web') ?>/images/thumbs/avatar1.png" /></div>
+                    <div class="thumb"><img alt="" src="<?= Yii::getAlias('@basic') ?>/images/thumbs/avatar1.png" /></div>
                     <div class="userlogged">
                         <h4></h4>
                         <a href="index.html">Not <span></span>?</a> 

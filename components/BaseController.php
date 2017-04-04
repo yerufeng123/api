@@ -23,6 +23,11 @@ class BaseController extends Controller
 	private $response;
     private $model;//代理模型
 
+    public function __construct($id,$module,$config = []){
+        Yii::setAlias('@basic', '@web/public/basic');
+        return parent::__construct($id,$module,$config = []);
+    }
+
 	public function beforeAction($action){
         $this->response=Yii::$app->response;
 		if(DebugHelper::getInstance()->validateDebug()){

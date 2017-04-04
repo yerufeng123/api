@@ -14,8 +14,22 @@ use yii\web\AssetBundle;
  */
 class BackgroundAsset extends AssetBundle
 {
-    public $sourcePath = '@app/themes/basic/asssets'; 
+    //public $sourcePath = '@app/themes/basic/asssets'; 
+    public $basePath = '@webroot/public/basic';
+    public $baseUrl = '@web/public/basic';
     public $css = [
+        'fonts/roboto.css',
+        'css/plugins/jquery.alerts.css',
+        'css/plugins/uniform.tp.css',
+        'css/plugins/jquery.ui.css',
+        'css/plugins/jquery.ui.autocomplete.css',
+        'css/plugins/fullcalendar.css',
+        'css/plugins/colorbox.css',
+        'css/plugins/colorpicker.css',
+        'css/plugins/jquery.jgrowl.css',
+        'css/plugins/jquery.tagsinput.css',
+        'css/plugins/ui.spinner.css',
+        'css/plugins/jquery.chosen.css',
         'css/style.default.css',
     ];
     public $js = [
@@ -27,6 +41,5 @@ class BackgroundAsset extends AssetBundle
         'js/custom/index.js',
     ];
     public $depends = [
-        'yii\bootstrap\BootstrapPluginAsset',
     ];
 }
