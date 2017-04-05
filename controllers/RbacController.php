@@ -6,8 +6,6 @@ use app\components\BaseController;
 
 class RbacController extends BaseController
 {
-    public $layout = 'basic_header';
-
     public function actionInit()
     {
         echo 222;die;
@@ -42,6 +40,6 @@ class RbacController extends BaseController
     }
 
     public function actionMyauth(){
-        $this->render('myauth');
+        return $this->renderPartial('myauth');
     }
 }

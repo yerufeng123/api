@@ -78,7 +78,7 @@ jQuery(document).ready(function(){
 	
 	///// NOTIFICATION CONTENT /////
 	
-	jQuery('body').on('click','.notitab a',function(){
+	jQuery('.notitab a').live('click', function(){
 		var id = jQuery(this).attr('href');
 		jQuery('.notitab li').removeClass('current'); //reset current 
 		jQuery(this).parent().addClass('current');
@@ -118,7 +118,7 @@ jQuery(document).ready(function(){
 	
 	
 	///// SHOW/HIDE SUB MENU WHEN MENU COLLAPSED /////
-	jQuery('body').on('mouseenter mouseleave','.menucoll > ul > li, .menucoll2 > ul > li',function(e){
+	jQuery('.menucoll > ul > li, .menucoll2 > ul > li').live('mouseenter mouseleave',function(e){
 		if(e.type == 'mouseenter') {
 			jQuery(this).addClass('hover');
 			jQuery(this).find('ul').show();	
@@ -292,11 +292,11 @@ jQuery(document).ready(function(){
 	}
 	
 	
-	jQuery('body').on('click','.searchicon',function(){
+	jQuery('.searchicon').live('click',function(){
 		jQuery('.searchinner').show();
 	});
 	
-	jQuery('body').on('click','.searchcancel',function(){
+	jQuery('.searchcancel').live('click',function(){
 		jQuery('.searchinner').hide();
 	});
 	

@@ -1,6 +1,5 @@
 <?php
 use yii\helpers\Html;
-use yii\web\JqueryAsset;
 use app\themes\basic\BackgroundAsset;
 
 
@@ -8,8 +7,8 @@ use app\themes\basic\BackgroundAsset;
 /* @var $content string */
 
 $this->title='登录页';
-JqueryAsset::register($this);
 BackgroundAsset::register($this);
+$this->registerJsFile("@web/public/basic/js/custom/index.js"); 
 ?>
 
 <?php $this->beginPage() ?>
