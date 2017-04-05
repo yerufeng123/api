@@ -6,8 +6,11 @@ use app\components\BaseController;
 
 class RbacController extends BaseController
 {
+    public $layout = 'basic_header';
+
     public function actionInit()
     {
+        echo 222;die;
         $auth = Yii::$app->authManager;
 
         // 添加 "createPost" 权限
@@ -36,5 +39,9 @@ class RbacController extends BaseController
         // 通常在你的 User 模型中实现这个函数。
         $auth->assign($author, 2);
         $auth->assign($admin, 1);
+    }
+
+    public function actionMyauth(){
+        $this->render('myauth');
     }
 }

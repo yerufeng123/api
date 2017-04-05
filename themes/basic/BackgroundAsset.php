@@ -37,8 +37,12 @@ class BackgroundAsset extends AssetBundle
         'js/plugins/jquery-ui-1.8.16.custom.min.js',
         'js/plugins/jquery.cookie.js',
         'js/plugins/jquery.uniform-2.2.2.min.js',
+        'js/plugins/jquery.flot.min.js',
+        'js/plugins/jquery.flot.resize.min.js',
+        'js/plugins/jquery.slimscroll.js',
         'js/custom/general.js',
         'js/custom/index.js',
+        'js/custom/dashboard.js',
     ];
     public $depends = [
     ];
