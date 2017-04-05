@@ -9,9 +9,9 @@
 
 return [
     // Adjust command/callback for JavaScript files compressing:
-    'jsCompressor' => 'java -jar vendor\crisu83\closurecompiler-bin\build\compiler.jar --js {from} --js_output_file {to}',
+    'jsCompressor' => 'java -jar vendor/crisu83/closurecompiler-bin/build/compiler.jar --js {from} --js_output_file {to}',
     // Adjust command/callback for CSS files compressing:
-    'cssCompressor' => 'java -jar vendor\nervo\yuicompressor\yuicompressor.jar --type css {from} -o {to}',
+    'cssCompressor' => 'java -jar vendor/nervo/yuicompressor/yuicompressor.jar --type css {from} -o {to}',
     // Whether to delete asset source after compression:
     'deleteSource' => false,
     // The list of asset bundles to compress:
@@ -20,12 +20,25 @@ return [
     ],
     // Asset bundle for compression output:
     'targets' => [
-        'all' => [
+        'all' => [//共用部分
             'class' => 'yii\web\AssetBundle',
-            'basePath' => '@webroot/assets',
-            'baseUrl' => '@web/assets',
+            'basePath' => '@webroot/public',
+            'baseUrl' => '@web/public',
             'js' => 'js/all-{hash}.js',
             'css' => 'css/all-{hash}.css',
+            'depends' => [
+                
+            ],
+        ],
+        'back' => [//后台部分
+            'class' => 'yii\web\AssetBundle',
+            'basePath' => '@webroot/public',
+            'baseUrl' => '@web/public',
+            'js' => 'js/back-{hash}.js',
+            'css' => 'css/back-{hash}.css',
+            'depends' => [
+                'app\themes\basic\BackgroundAsset',
+            ],
         ],
     ],
     // Asset manager configuration:
