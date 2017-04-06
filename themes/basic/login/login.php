@@ -1,33 +1,9 @@
 <?php
-use yii\helpers\Html;
-use app\themes\basic\BackgroundAsset;
-
-
-/* @var $this \yii\web\View */
-/* @var $content string */
-
-$this->title='登录页';
-BackgroundAsset::register($this);
-$this->registerJsFile("@web/public/basic/js/custom/index.js"); 
+$this->title='登录';
+$this->registerJsFile("@basic/js/plugins/css3-mediaqueries.js",['condition' => 'lt IE9']); 
+$this->registerJsFile("@basic/js/custom/index.js"); 
 ?>
 
-<?php $this->beginPage() ?>
-<!DOCTYPE html>
-<html lang="<?= Yii::$app->language ?>">
-<head>
-	<meta charset="<?= Yii::$app->charset ?>">
-	<title><?= Html::encode($this->title)?></title>
-	<!--[if IE 9]>
-	    <link rel="stylesheet" media="screen" href="<?= Yii::getAlias('@basic') ?>/css/style.ie9.css"/>
-	<![endif]-->
-	<!--[if IE 8]>
-	    <link rel="stylesheet" media="screen" href="<?= Yii::getAlias('@basic') ?>/css/style.ie8.css"/>
-	<![endif]-->
-	<!--[if lt IE 9]>
-		<script src="<?= Yii::getAlias('@basic') ?>/js/plugins/css3-mediaqueries.js"></script>
-	<![endif]-->
-	<?php $this->head() ?>
-	</head>
 <body class="loginpage">
 	<?php $this->beginBody() ?>
 	<div class="loginbox">
@@ -79,6 +55,4 @@ $this->registerJsFile("@web/public/basic/js/custom/index.js");
     </div><!--loginbox-->
 	<?php $this->endBody() ?>
 </body>
-</html>
-<?php $this->endPage();?>
 

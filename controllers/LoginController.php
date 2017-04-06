@@ -14,11 +14,12 @@ use app\components\Tools;
  */
 class LoginController extends BaseController
 {
+    public $layout="basic";
     /**
      *登录-页面(
      */
     public function actionIndex(){
-        return $this->renderPartial('login');
+        return $this->render('login');
     }
 
     /**

@@ -6,6 +6,8 @@ use app\components\BaseController;
 
 class RbacController extends BaseController
 {
+    public $layout = 'basic_nav';
+
     public function actionInit()
     {
         echo 222;die;
@@ -39,7 +41,10 @@ class RbacController extends BaseController
         $auth->assign($admin, 1);
     }
 
-    public function actionMyauth(){
-        return $this->renderPartial('myauth');
+    /**
+     *我的权限
+     */
+    public function actionIndex(){
+        return $this->render('myauth');
     }
 }
