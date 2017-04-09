@@ -10,13 +10,14 @@ class RbacController extends BaseController
 
     public function actionInit()
     {
-        echo 222;die;
         $auth = Yii::$app->authManager;
 
         // 添加 "createPost" 权限
         $createPost = $auth->createPermission('createPost');
         $createPost->description = 'Create a post';
         $auth->add($createPost);
+                echo '<pre>';
+        var_dump($createPost);die;
 
         // 添加 "updatePost" 权限
         $updatePost = $auth->createPermission('updatePost');

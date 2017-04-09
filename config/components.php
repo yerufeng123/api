@@ -58,7 +58,7 @@ return [
     //     'sessionTable' => 'my_session', // session 数据表名，默认为'session'.
     // ],
     'authManager' => [
-        'class' => 'yii\rbac\DbManager',  
+        'class' => 'app\components\rbac\DbManager',  
         'itemTable' => 'web_auth_item',  
         'assignmentTable' => 'web_auth_assignment',  
         'itemChildTable' => 'web_auth_item_child',  

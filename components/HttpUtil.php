@@ -1,4 +1,9 @@
 <?php
+/**
+ *通讯类
+ * @author gaoxiangdong<gxd_dnjlw@163.com>
+ * @copyright 2017-03-22
+ */
 namespace app\components;
 
 use yii\base\Component;
