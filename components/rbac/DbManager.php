@@ -64,11 +64,11 @@ class DbManager extends BaseManager
     /**
      * @var string 菜单表
      */
-    public $ruleTable = '{{%auth_menu}}';
+    public $menuTable = '{{%auth_menu}}';
     /**
      * @var string 应用表
      */
-    public $ruleTable = '{{%auth_application}}';
+    public $applicationTable = '{{%auth_application}}';
 
     /**
      * @var Cache|array|string the cache used to improve RBAC performance. This can be one of the following:
@@ -316,9 +316,9 @@ class DbManager extends BaseManager
     /**
      * @inheritdoc
      */
-    protected function updateItem($name, $item)
+    protected function updateItem($application, $name, $item)
     {
-        if ($item->name !== $name && !$this->supportsCascadeUpdate()) {
+        if ($item->app_name === $application && $item->name !== $name && !$this->supportsCascadeUpdate()) {
             $this->db->createCommand()
                 ->update($this->itemChildTable, ['parent' => $item->name], ['parent' => $name])
                 ->execute();
@@ -334,6 +334,7 @@ class DbManager extends BaseManager
 
         $this->db->createCommand()
             ->update($this->itemTable, [
+                'app_name' => $item->appName,
                 'name' => $item->name,
                 'description' => $item->description,
                 'rule_name' => $item->ruleName,
@@ -1027,5 +1028,77 @@ class DbManager extends BaseManager
         return (new Query)->select('[[user_id]]')
             ->from($this->assignmentTable)
             ->where(['item_name' => $roleName])->column($this->db);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function addApplication($application)
+    {
+        $time = time();
+        if ($application->createdAt === null) {
+            $application->createdAt = $time;
+        }
+        if ($application->updatedAt === null) {
+            $application->updatedAt = $time;
+        }
+        $this->db->createCommand()
+            ->insert($this->applicationTable, [
+                'name' => $application->name,
+                'user_username' => $application->userUsername,
+                'created_at' => $application->createdAt,
+                'updated_at' => $application->updatedAt,
+            ])->execute();
+
+        $this->invalidateCache();
+
+        return true;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function updateApplication($name, $application)
+    {
+        if ($rule->name !== $name && !$this->supportsCascadeUpdate()) {
+            $this->db->createCommand()
+                ->update($this->itemTable, ['rule_name' => $rule->name], ['rule_name' => $name])
+                ->execute();
+        }
+
+        $rule->updatedAt = time();
+
+        $this->db->createCommand()
+            ->update($this->ruleTable, [
+                'name' => $rule->name,
+                'data' => serialize($rule),
+                'updated_at' => $rule->updatedAt,
+            ], [
+                'name' => $name,
+            ])->execute();
+
+        $this->invalidateCache();
+
+        return true;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function removeRule($rule)
+    {
+        if (!$this->supportsCascadeUpdate()) {
+            $this->db->createCommand()
+                ->update($this->itemTable, ['rule_name' => null], ['rule_name' => $rule->name])
+                ->execute();
+        }
+
+        $this->db->createCommand()
+            ->delete($this->ruleTable, ['name' => $rule->name])
+            ->execute();
+
+        $this->invalidateCache();
+
+        return true;
     }
 }
