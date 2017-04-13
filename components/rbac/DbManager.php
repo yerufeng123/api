@@ -1060,19 +1060,19 @@ class DbManager extends BaseManager
      */
     protected function updateApplication($name, $application)
     {
-        if ($rule->name !== $name && !$this->supportsCascadeUpdate()) {
+        if ($application->name !== $name && !$this->supportsCascadeUpdate()) {
             $this->db->createCommand()
-                ->update($this->itemTable, ['rule_name' => $rule->name], ['rule_name' => $name])
+                ->update($this->itemTable, ['app_name' => $application->name], ['app_name' => $name])
                 ->execute();
         }
 
         $rule->updatedAt = time();
 
         $this->db->createCommand()
-            ->update($this->ruleTable, [
-                'name' => $rule->name,
-                'data' => serialize($rule),
-                'updated_at' => $rule->updatedAt,
+            ->update($this->applicationTable, [
+                'name' => $application->name,
+                'user_username' => $application->userUsername,
+                'updated_at' => $application->updatedAt,
             ], [
                 'name' => $name,
             ])->execute();
@@ -1085,7 +1085,7 @@ class DbManager extends BaseManager
     /**
      * @inheritdoc
      */
-    protected function removeRule($rule)
+    protected function removeApplication($rule)
     {
         if (!$this->supportsCascadeUpdate()) {
             $this->db->createCommand()
