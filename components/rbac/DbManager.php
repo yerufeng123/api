@@ -275,7 +275,6 @@ class DbManager extends BaseManager
         }
         $this->db->createCommand()
             ->insert($this->itemTable, [
-                'app_name' => $item->app_name,
                 'name' => $item->name,
                 'type' => $item->type,
                 'description' => $item->description,
@@ -283,6 +282,7 @@ class DbManager extends BaseManager
                 'data' => $item->data === null ? null : serialize($item->data),
                 'created_at' => $item->createdAt,
                 'updated_at' => $item->updatedAt,
+                'app_name' => $item->app_name,
             ])->execute();
 
         $this->invalidateCache();
@@ -318,7 +318,7 @@ class DbManager extends BaseManager
      */
     protected function updateItem($application, $name, $item)
     {
-        if ($item->app_name === $application && $item->name !== $name && !$this->supportsCascadeUpdate()) {
+        if ($item->name !== $name && !$this->supportsCascadeUpdate()) {
             $this->db->createCommand()
                 ->update($this->itemChildTable, ['parent' => $item->name], ['parent' => $name])
                 ->execute();
@@ -334,12 +334,12 @@ class DbManager extends BaseManager
 
         $this->db->createCommand()
             ->update($this->itemTable, [
-                'app_name' => $item->appName,
                 'name' => $item->name,
                 'description' => $item->description,
                 'rule_name' => $item->ruleName,
                 'data' => $item->data === null ? null : serialize($item->data),
                 'updated_at' => $item->updatedAt,
+                'app_name' => $item->appName,
             ], [
                 'name' => $name,
             ])->execute();
@@ -422,13 +422,18 @@ class DbManager extends BaseManager
     }
 
     /**
-     * @inheritdoc
+     * 获取指定应用的全部角色或权限
+     * @param $type 1:角色 2权限
+     * @param $application 指定的应用
      */
-    protected function getItems($type)
+    protected function getItems($type,$application)
     {
         $query = (new Query)
             ->from($this->itemTable)
-            ->where(['type' => $type]);
+            ->where([
+                'type' => $type,
+                'app_name' => $application->appName,
+            ]);
 
         $items = [];
         foreach ($query->all($this->db) as $row) {
@@ -439,7 +444,7 @@ class DbManager extends BaseManager
     }
 
     /**
-     * Populates an auth item with the data fetched from database
+     * 填充一个从数据库中获取到的认证权限
      * @param array $row the data from the auth item table
      * @return Item the populated auth item instance (either Role or Permission)
      */
@@ -459,6 +464,7 @@ class DbManager extends BaseManager
             'data' => $data,
             'createdAt' => $row['created_at'],
             'updatedAt' => $row['updated_at'],
+            'appName' => $row['app_name'],
         ]);
     }
 
@@ -1031,7 +1037,8 @@ class DbManager extends BaseManager
     }
 
     /**
-     * @inheritdoc
+     * 添加一个应用
+     * $application 新的应用对象
      */
     protected function addApplication($application)
     {
@@ -1045,9 +1052,9 @@ class DbManager extends BaseManager
         $this->db->createCommand()
             ->insert($this->applicationTable, [
                 'name' => $application->name,
-                'user_username' => $application->userUsername,
                 'created_at' => $application->createdAt,
                 'updated_at' => $application->updatedAt,
+                'user_username' => $application->userUsername,
             ])->execute();
 
         $this->invalidateCache();
@@ -1056,13 +1063,18 @@ class DbManager extends BaseManager
     }
 
     /**
-     * @inheritdoc
+     * 更新一个应用
+     * @param $name 要更新的对象名
+     * @param $application 应用对象
      */
     protected function updateApplication($name, $application)
     {
         if ($application->name !== $name && !$this->supportsCascadeUpdate()) {
             $this->db->createCommand()
                 ->update($this->itemTable, ['app_name' => $application->name], ['app_name' => $name])
+                ->execute();
+            $this->db->createCommand()
+                ->update($this->menuTable, ['app_name' => $application->name], ['app_name' => $name])
                 ->execute();
         }
 
@@ -1071,8 +1083,8 @@ class DbManager extends BaseManager
         $this->db->createCommand()
             ->update($this->applicationTable, [
                 'name' => $application->name,
-                'user_username' => $application->userUsername,
                 'updated_at' => $application->updatedAt,
+                'user_username' => $application->userUsername,
             ], [
                 'name' => $name,
             ])->execute();
@@ -1083,18 +1095,90 @@ class DbManager extends BaseManager
     }
 
     /**
-     * @inheritdoc
+     * 删除一个应用
+     * @param $application 要删除的应用对象
      */
-    protected function removeApplication($rule)
+    protected function removeApplication($application)
     {
         if (!$this->supportsCascadeUpdate()) {
             $this->db->createCommand()
-                ->update($this->itemTable, ['rule_name' => null], ['rule_name' => $rule->name])
+                ->delete($this->itemTable, ['app_name' => $application->name])
+                ->execute();
+            $this->db->createCommand()
+                ->delete($this->menuTable, ['app_name' => $application->name])
                 ->execute();
         }
 
         $this->db->createCommand()
-            ->delete($this->ruleTable, ['name' => $rule->name])
+            ->delete($this->applicationTable, ['name' => $application->name])
+            ->execute();
+
+        $this->invalidateCache();
+
+        return true;
+    }
+
+    /**
+     * 添加一个菜单
+     * $menu 要添加的菜单对象
+     */
+    protected function addMenu($menu)
+    {
+        $time = time();
+        if ($menu->createdAt === null) {
+            $menu->createdAt = $time;
+        }
+        if ($menu->updatedAt === null) {
+            $menu->updatedAt = $time;
+        }
+        $this->db->createCommand()
+            ->insert($this->menuTable, [
+                'name' => $menu->name,
+                'type' => $menu->type,
+                'description' => $menu->description,
+                'created_at' => $menu->createdAt,
+                'updated_at' => $menu->updatedAt,
+                'app_name' => $menu->appName,
+            ])->execute();
+
+        $this->invalidateCache();
+
+        return true;
+    }
+
+    /**
+     * 更新一个菜单
+     * @param $name 要更新的菜单名
+     * @param $menu 菜单对象
+     */
+    protected function updateMenu($name, $menu)
+    {
+        $menu->updatedAt = time();
+
+        $this->db->createCommand()
+            ->update($this->menuTable, [
+                'name' => $menu->name,
+                'type' => $menu->type,
+                'description' => $menu->description,
+                'updated_at' => $menu->updatedAt,
+                'app_name' => $menu->appName,
+            ], [
+                'name' => $name,
+            ])->execute();
+
+        $this->invalidateCache();
+
+        return true;
+    }
+
+    /**
+     * 删除一个菜单
+     * @param $menu 要删除菜单对象
+     */
+    protected function removeMenu($menu)
+    {
+        $this->db->createCommand()
+            ->delete($this->menuTable, ['name' => $menu->name])
             ->execute();
 
         $this->invalidateCache();

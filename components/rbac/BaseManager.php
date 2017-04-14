@@ -10,6 +10,7 @@ namespace app\components\rbac;
 use yii\base\Component;
 use yii\base\InvalidConfigException;
 use yii\base\InvalidParamException;
+use yii\rbac\ManagerInterface;
 
 /**
  * BaseManager is a base class implementing [[ManagerInterface]] for RBAC management.
@@ -80,7 +81,7 @@ abstract class BaseManager extends Component implements ManagerInterface
      * @return bool whether the auth item is successfully updated
      * @throws \Exception if data validation or saving fails (such as the name of the role or permission is not unique)
      */
-    abstract protected function updateItem($name, $item);
+    abstract protected function updateItem($application,$name, $item);
 
     /**
      * Updates a rule to the RBAC system.
