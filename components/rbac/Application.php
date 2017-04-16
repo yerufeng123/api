@@ -25,7 +25,7 @@ class Application extends Object
     /**
      * @var string 用户账号
      */
-    public $userUsername;
+    public $userId;
     /**
      * @var int UNIX timestamp 创建时间
      */

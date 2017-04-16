@@ -109,6 +109,10 @@ class DbManager extends BaseManager
      * @var array auth item parent-child relationships (childName => list of parents)
      */
     protected $parents;
+    /**
+     * @var Application[] all auth applications (name => Application)
+     */
+    protected $applications;
 
 
     /**
@@ -282,7 +286,7 @@ class DbManager extends BaseManager
                 'data' => $item->data === null ? null : serialize($item->data),
                 'created_at' => $item->createdAt,
                 'updated_at' => $item->updatedAt,
-                'app_name' => $item->app_name,
+                'app_name' => $item->appName,
             ])->execute();
 
         $this->invalidateCache();
@@ -465,6 +469,21 @@ class DbManager extends BaseManager
             'createdAt' => $row['created_at'],
             'updatedAt' => $row['updated_at'],
             'appName' => $row['app_name'],
+        ]);
+    }
+
+    /**
+     * 填充一个从数据库中获取到的应用
+     * @param array $row the data from the auth item table
+     * @return Application the populated auth application instance 
+     */
+    protected function populateApplication($row)
+    {
+        return new Application([
+            'name' => $row['name'],
+            'createdAt' => $row['created_at'],
+            'updatedAt' => $row['updated_at'],
+            'userId' => $row['user_id'],
         ]);
     }
 
@@ -1054,7 +1073,7 @@ class DbManager extends BaseManager
                 'name' => $application->name,
                 'created_at' => $application->createdAt,
                 'updated_at' => $application->updatedAt,
-                'user_username' => $application->userUsername,
+                'user_id' => $application->userId,
             ])->execute();
 
         $this->invalidateCache();
@@ -1084,7 +1103,7 @@ class DbManager extends BaseManager
             ->update($this->applicationTable, [
                 'name' => $application->name,
                 'updated_at' => $application->updatedAt,
-                'user_username' => $application->userUsername,
+                'user_id' => $application->userId,
             ], [
                 'name' => $name,
             ])->execute();
@@ -1117,6 +1136,68 @@ class DbManager extends BaseManager
 
         return true;
     }
+
+    /**
+     * 获取一个应用
+     * @param $name 应用名
+     */
+    protected function _getApplication($name)
+    {
+        if (empty($name)) {
+            return null;
+        }
+
+        if (!empty($this->applications[$name])) {
+            return $this->applications[$name];
+        }
+
+        $row = (new Query)->from($this->applicationTable)
+            ->where(['name' => $name])
+            ->one($this->db);
+
+        if ($row === false) {
+            return null;
+        }
+
+        return $this->populateApplication($row);
+    }
+
+    /**
+     * 获取全部应用
+     */
+    protected function _getApplications()
+    {
+        $query = (new Query)
+            ->from($this->applicationTable);
+
+        $applications = [];
+        foreach ($query->all($this->db) as $row) {
+            $applications[$applications['name']] = $this->populateApplication($row);
+        }
+
+        return $applications;
+    }
+
+    /**
+     * 获取指定用户的全部应用
+     */
+    protected function _getApplicationsByUser($userId)
+    {
+        $query = (new Query)
+            ->from($this->applicationTable)
+            ->where([
+                'user_id' => $userId,
+            ]);
+
+        $applications = [];
+        foreach ($query->all($this->db) as $row) {
+            $applications[$applications['name']] = $this->populateApplication($row);
+        }
+
+        return $applications;
+    }
+
+
 
     /**
      * 添加一个菜单

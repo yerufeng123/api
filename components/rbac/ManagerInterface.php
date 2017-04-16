@@ -5,7 +5,9 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace yii\rbac;
+namespace app\components\rbac;
+
+use yii\rbac\CheckAccessInterface;
 
 /**
  * For more details and usage information on ManagerInterface, see the [guide article on security authorization](guide:security-authorization).
@@ -16,22 +18,40 @@ namespace yii\rbac;
 interface ManagerInterface extends CheckAccessInterface
 {
     /**
+     * Creates a new Application object.
+     * @param string $name the application name
+     * @param string $userId the user id
+     * @return Role the new Application object
+     */
+    public function createApplication($name,$userId);
+
+    /**
+     * Creates a new Menu object.
+     * @param string $name the menu name
+     * @param string $appName the application name
+     * @return Permission the new Menu object
+     */
+    public function createMenu($name,$appName);
+
+    /**
      * Creates a new Role object.
      * Note that the newly created role is not added to the RBAC system yet.
      * You must fill in the needed data and call [[add()]] to add it to the system.
      * @param string $name the role name
+     * @param string $appName the application name
      * @return Role the new Role object
      */
-    public function createRole($name);
+    public function createRole($name,$appName);
 
     /**
      * Creates a new Permission object.
      * Note that the newly created permission is not added to the RBAC system yet.
      * You must fill in the needed data and call [[add()]] to add it to the system.
      * @param string $name the permission name
+     * @param string $appName the application name
      * @return Permission the new Permission object
      */
-    public function createPermission($name);
+    public function createPermission($name,$appName);
 
     /**
      * Adds a role, permission or rule to the RBAC system.

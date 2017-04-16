@@ -10,7 +10,7 @@ namespace app\components\rbac;
 use yii\base\Component;
 use yii\base\InvalidConfigException;
 use yii\base\InvalidParamException;
-use yii\rbac\ManagerInterface;
+use app\components\rbac\ManagerInterface;
 
 /**
  * BaseManager is a base class implementing [[ManagerInterface]] for RBAC management.
@@ -38,9 +38,21 @@ abstract class BaseManager extends Component implements ManagerInterface
     /**
      * Returns the items of the specified type.
      * @param int $type the auth item type (either [[Item::TYPE_ROLE]] or [[Item::TYPE_PERMISSION]]
+     * @param string $application 应用
      * @return Item[] the auth items of the specified type.
      */
-    abstract protected function getItems($type);
+    abstract protected function getItems($type,$application);
+
+    /**
+     * Returns the named application.
+     * @param string $name the application name
+     * @return Application[] the auth items of the specified type.
+     */
+    abstract protected function getApplication($name);
+
+    abstract protected function getApplications();
+
+    abstract protected function getApplicationsByUser($userId);
 
     /**
      * Adds an auth item to the RBAC system.
@@ -95,20 +107,44 @@ abstract class BaseManager extends Component implements ManagerInterface
     /**
      * @inheritdoc
      */
-    public function createRole($name)
+    public function createApplication($name,$userId)
+    {
+        $application = new Application();
+        $application->name = $name;
+        $application->userId=$userId;
+        return $application;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function createMenu($name,$appName)
+    {
+        $menu = new Menu();
+        $menu->name = $name;
+        $menu->appName=$appName;
+        return $menu;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function createRole($name,$appName)
     {
         $role = new Role();
         $role->name = $name;
+        $role->appName=$appName;
         return $role;
     }
 
     /**
      * @inheritdoc
      */
-    public function createPermission($name)
+    public function createPermission($name,$appName)
     {
         $permission = new Permission();
         $permission->name = $name;
+        $permission->appName=$appName;
         return $permission;
     }
 
@@ -126,6 +162,10 @@ abstract class BaseManager extends Component implements ManagerInterface
             return $this->addItem($object);
         } elseif ($object instanceof Rule) {
             return $this->addRule($object);
+        } elseif ($object instanceof Application) {
+            return $this->addApplication($object);
+        } elseif ($object instanceof Menu) {
+            return $this->addMenu($object);
         } else {
             throw new InvalidParamException('Adding unsupported object type.');
         }
@@ -140,6 +180,10 @@ abstract class BaseManager extends Component implements ManagerInterface
             return $this->removeItem($object);
         } elseif ($object instanceof Rule) {
             return $this->removeRule($object);
+        } elseif ($object instanceof Application) {
+            return $this->removeApplication($object);
+        } elseif ($object instanceof Menu) {
+            return $this->removeMenu($object);
         } else {
             throw new InvalidParamException('Removing unsupported object type.');
         }
@@ -159,7 +203,11 @@ abstract class BaseManager extends Component implements ManagerInterface
             return $this->updateItem($name, $object);
         } elseif ($object instanceof Rule) {
             return $this->updateRule($name, $object);
-        } else {
+        } elseif ($object instanceof Application) {
+            return $this->updateApplication($name, $object);
+        }elseif ($object instanceof Menu) {
+            return $this->updateMenu($name, $object);
+        }else {
             throw new InvalidParamException('Updating unsupported object type.');
         }
     }
@@ -197,6 +245,7 @@ abstract class BaseManager extends Component implements ManagerInterface
     {
         return $this->getItems(Item::TYPE_PERMISSION);
     }
+
 
     /**
      * Executes the rule associated with the specified auth item.
