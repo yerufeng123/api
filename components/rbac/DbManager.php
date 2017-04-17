@@ -113,6 +113,10 @@ class DbManager extends BaseManager
      * @var Application[] all auth applications (name => Application)
      */
     protected $applications;
+    /**
+     * @var Menu[] all auth menus (name => Menu)
+     */
+    protected $menus;
 
 
     /**
@@ -484,6 +488,23 @@ class DbManager extends BaseManager
             'createdAt' => $row['created_at'],
             'updatedAt' => $row['updated_at'],
             'userId' => $row['user_id'],
+        ]);
+    }
+
+    /**
+     * 填充一个从数据库中获取到的菜单
+     * @param array $row 菜单表的一条数据
+     * @return Menu the populated auth menu instance 
+     */
+    protected function populateMenu($row)
+    {
+        return new Menu([
+            'name' => $row['name'],
+            'type' => $row['type'],
+            'description' => $row['description'],
+            'createdAt' => $row['created_at'],
+            'updatedAt' => $row['updated_at'],
+            'appName' => $row['app_name'],
         ]);
     }
 
@@ -1246,5 +1267,47 @@ class DbManager extends BaseManager
         $this->invalidateCache();
 
         return true;
+    }
+
+    /**
+     * 获取一个菜单
+     * @param $params array 参数
+     */
+    protected function getMenuOne($params)
+    {
+        if (empty($params)) {
+            return null;
+        }
+
+        if (isset($params['name']) && !empty($params['name']) && !empty($this->menus[$params['name']])) {
+            return $this->params[$params['name']];
+        }
+
+        $row = (new Query)->from($this->menuTable)
+            ->where($params)
+            ->one($this->db);
+
+        if ($row === false) {
+            return null;
+        }
+
+        return $this->populateMenu($row);
+    }
+
+    /**
+     * 获取多个应用
+     */
+    protected function getMenuMore($params)
+    {
+        $query = (new Query)
+            ->from($this->menuTable)
+            ->where($params);
+
+        $menus = [];
+        foreach ($query->all($this->db) as $row) {
+            $menus[$row['name']] = $this->populateMenu($row);
+        }
+
+        return $menus;
     }
 }

@@ -15,8 +15,16 @@ class RbacController extends BaseController
         //创建一个应用
         // $application=$auth->createApplication('test_appname',$userId);
         // $auth->add($application);
-        $application=$auth->getApplications();
+        $application=$auth->getApplicationByName('test_appname');
+        //创建一个菜单
+        $menu01=$auth->createMenu('menu01',$application->name);
+        $menu02=$auth->createMenu('menu02',$application->name);
+        $auth->add($menu01);
+        $auth->add($menu02);die;
+
+        
         var_dump($application);die;
+
         // 添加 "createPost" 权限
         $createPost = $auth->createPermission('createPost',$application->name);
         $createPost->description = 'Create a post';

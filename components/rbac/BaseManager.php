@@ -108,6 +108,20 @@ abstract class BaseManager extends Component implements ManagerInterface
     abstract protected function getApplicationMore($params);
 
     /**
+     * 根据条件返回一个菜单
+     * @param string $params 检索的条件.
+     * @return 返回一个指定条件的菜单，如果没有这样的菜单就返回null.
+     */
+    abstract protected function getMenuOne($params);
+
+    /**
+     * 根据条件返回全部菜单
+     * @param string $params 检索的条件.
+     * @return 返回全部指定条件的菜单，如果没有这样的菜单就返回null.
+     */
+    abstract protected function getMenuMore($params);
+
+    /**
      * @inheritdoc
      */
     public function createApplication($name,$userId)
@@ -252,9 +266,9 @@ abstract class BaseManager extends Component implements ManagerInterface
     /**
      * Returns the named application.
      * @param string $name the application name
-     * @return Application[] the auth items of the specified type.
+     * @return Application the auth items of the specified type.
      */
-    public function getApplication($name){
+    public function getApplicationByName($name){
         $application = $this->getApplicationOne(['name' => $name]);
         return $application instanceof Application ? $application : null;
     }
@@ -274,6 +288,25 @@ abstract class BaseManager extends Component implements ManagerInterface
      */
     public function getApplicationsByUser($userId){
         return $this->getApplicationMore(['user_id' => $userId]);
+    }
+
+    /**
+     * 返回指定名称的菜单
+     * @param string $name 菜单名
+     * @return 返回一个菜单对象，如果该菜单不存在就返回null
+     */
+    public function getMenuByName($name){
+        $menu = $this->getMenuOne(['name' => $name]);
+        return $menu instanceof Menu ? $menu : null;
+    }
+
+    /**
+     * 返回指定名称的菜单
+     * @param string $name 菜单名
+     * @return 返回一个菜单对象，如果该菜单不存在就返回null
+     */
+    public function getMenusByApplicationName($appName){
+        return $this->getMenuMore(['app_name' => $appName]);
     }
 
 
