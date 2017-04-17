@@ -44,17 +44,6 @@ abstract class BaseManager extends Component implements ManagerInterface
     abstract protected function getItems($type,$application);
 
     /**
-     * Returns the named application.
-     * @param string $name the application name
-     * @return Application[] the auth items of the specified type.
-     */
-    abstract protected function getApplication($name);
-
-    abstract protected function getApplications();
-
-    abstract protected function getApplicationsByUser($userId);
-
-    /**
      * Adds an auth item to the RBAC system.
      * @param Item $item the item to add
      * @return bool whether the auth item is successfully added to the system
@@ -103,6 +92,20 @@ abstract class BaseManager extends Component implements ManagerInterface
      * @throws \Exception if data validation or saving fails (such as the name of the rule is not unique)
      */
     abstract protected function updateRule($name, $rule);
+
+    /**
+     * 根据条件返回一个应用
+     * @param string $params 检索的条件.
+     * @return 返回一个指定条件的应用，如果没有这样的应用就返回null.
+     */
+    abstract protected function getApplicationOne($params);
+
+    /**
+     * 根据条件返回多个应用
+     * @param string $params 检索的条件.
+     * @return 返回全部指定条件的应用，如果没有这样的应用就返回null.
+     */
+    abstract protected function getApplicationMore($params);
 
     /**
      * @inheritdoc
@@ -244,6 +247,33 @@ abstract class BaseManager extends Component implements ManagerInterface
     public function getPermissions()
     {
         return $this->getItems(Item::TYPE_PERMISSION);
+    }
+
+    /**
+     * Returns the named application.
+     * @param string $name the application name
+     * @return Application[] the auth items of the specified type.
+     */
+    public function getApplication($name){
+        $application = $this->getApplicationOne(['name' => $name]);
+        return $application instanceof Application ? $application : null;
+    }
+
+    /**
+     * Returns the  applications.
+     * @return Application[] the applications.
+     */
+    public function getApplications(){
+        return $this->getApplicationMore([]);
+    }
+
+    /**
+     * Returns the application of the specified userId.
+     * @param int $userId the user id
+     * @return Application[] the auth item of the specified user idd.
+     */
+    public function getApplicationsByUser($userId){
+        return $this->getApplicationMore(['user_id' => $userId]);
     }
 
 

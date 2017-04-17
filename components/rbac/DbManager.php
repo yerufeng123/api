@@ -1139,20 +1139,20 @@ class DbManager extends BaseManager
 
     /**
      * 获取一个应用
-     * @param $name 应用名
+     * @param $params array 参数
      */
-    protected function _getApplication($name)
+    protected function getApplicationOne($params)
     {
-        if (empty($name)) {
+        if (empty($params)) {
             return null;
         }
 
-        if (!empty($this->applications[$name])) {
-            return $this->applications[$name];
+        if (isset($params['name']) && !empty($params['name']) && !empty($this->applications[$params['name']])) {
+            return $this->applications[$params['name']];
         }
 
         $row = (new Query)->from($this->applicationTable)
-            ->where(['name' => $name])
+            ->where($params)
             ->one($this->db);
 
         if ($row === false) {
@@ -1163,40 +1163,21 @@ class DbManager extends BaseManager
     }
 
     /**
-     * 获取全部应用
+     * 获取多个应用
      */
-    protected function _getApplications()
-    {
-        $query = (new Query)
-            ->from($this->applicationTable);
-
-        $applications = [];
-        foreach ($query->all($this->db) as $row) {
-            $applications[$applications['name']] = $this->populateApplication($row);
-        }
-
-        return $applications;
-    }
-
-    /**
-     * 获取指定用户的全部应用
-     */
-    protected function _getApplicationsByUser($userId)
+    protected function getApplicationMore($params)
     {
         $query = (new Query)
             ->from($this->applicationTable)
-            ->where([
-                'user_id' => $userId,
-            ]);
+            ->where($params);
 
         $applications = [];
         foreach ($query->all($this->db) as $row) {
-            $applications[$applications['name']] = $this->populateApplication($row);
+            $applications[$row['name']] = $this->populateApplication($row);
         }
 
         return $applications;
     }
-
 
 
     /**
