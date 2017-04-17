@@ -108,18 +108,19 @@ abstract class BaseManager extends Component implements ManagerInterface
     abstract protected function getApplicationMore($params);
 
     /**
-     * 根据条件返回一个菜单
-     * @param string $params 检索的条件.
+     * 返回一个菜单（操作）
+     * @param string $name 菜单(操作)名
      * @return 返回一个指定条件的菜单，如果没有这样的菜单就返回null.
      */
-    abstract protected function getMenuOne($params);
+    abstract protected function getNavigation($name);
 
     /**
-     * 根据条件返回全部菜单
-     * @param string $params 检索的条件.
+     * 根据条件返回全部菜单(操作)
+     * @param string $type 检索类型 1：菜单 2：操作
+     * @param string $application 应用对象
      * @return 返回全部指定条件的菜单，如果没有这样的菜单就返回null.
      */
-    abstract protected function getMenuMore($params);
+    abstract protected function getNavigations($type,$application);
 
     /**
      * @inheritdoc
@@ -141,6 +142,14 @@ abstract class BaseManager extends Component implements ManagerInterface
         $menu->name = $name;
         $menu->appName=$appName;
         return $menu;
+    }
+
+    public function createOperate($name,$appName)
+    {
+        $operate = new Operate();
+        $operate->name = $name;
+        $operate->appName=$appName;
+        return $operate;
     }
 
     /**
@@ -250,17 +259,53 @@ abstract class BaseManager extends Component implements ManagerInterface
     /**
      * @inheritdoc
      */
-    public function getRoles()
+    public function getRoles($application)
     {
-        return $this->getItems(Item::TYPE_ROLE);
+        return $this->getItems(Item::TYPE_ROLE,$application);
     }
 
     /**
      * @inheritdoc
      */
-    public function getPermissions()
+    public function getPermissions($application)
     {
-        return $this->getItems(Item::TYPE_PERMISSION);
+        return $this->getItems(Item::TYPE_PERMISSION,$application);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getMenu($name)
+    {
+        $menu = $this->getNavigation($name);
+        return $menu instanceof Menu && $menu->type == Navigation::TYPE_MENU ? $menu : null;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getOperate($name)
+    {
+        $operate = $this->getNavigation($name);
+        return $operate instanceof Operate && $operate->type == Operate::TYPE_OPERATE ? $operate : null;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getMenus($application)
+    {
+        return $this->getNavigations(Navigation::TYPE_MENU,$application);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getOperates($menu)
+    {
+        /**
+         *@todo :获取菜单下所属操作
+         */
     }
 
     /**

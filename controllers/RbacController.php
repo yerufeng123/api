@@ -13,9 +13,10 @@ class RbacController extends BaseController
         $auth = Yii::$app->authManager;
         $userId=1;
         //创建一个应用
-        // $application=$auth->createApplication('test_appname',$userId);
-        // $auth->add($application);
+        //$application=$auth->createApplication('test_appname',$userId);
+        //$auth->add($application);
         $application=$auth->getApplicationByName('test_appname');
+        var_dump($application);die;
         //创建一个菜单
         $menu01=$auth->createMenu('menu01',$application->name);
         $menu02=$auth->createMenu('menu02',$application->name);

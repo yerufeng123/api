@@ -496,9 +496,9 @@ class DbManager extends BaseManager
      * @param array $row 菜单表的一条数据
      * @return Menu the populated auth menu instance 
      */
-    protected function populateMenu($row)
+    protected function populateNavigation($row)
     {
-        return new Menu([
+        return new Navigation([
             'name' => $row['name'],
             'type' => $row['type'],
             'description' => $row['description'],
@@ -1203,25 +1203,25 @@ class DbManager extends BaseManager
 
     /**
      * 添加一个菜单
-     * $menu 要添加的菜单对象
+     * $navigation 要添加的菜单对象
      */
-    protected function addMenu($menu)
+    protected function addNavigation($navigation)
     {
         $time = time();
-        if ($menu->createdAt === null) {
-            $menu->createdAt = $time;
+        if ($navigation->createdAt === null) {
+            $navigation->createdAt = $time;
         }
-        if ($menu->updatedAt === null) {
-            $menu->updatedAt = $time;
+        if ($navigation->updatedAt === null) {
+            $navigation->updatedAt = $time;
         }
         $this->db->createCommand()
             ->insert($this->menuTable, [
-                'name' => $menu->name,
-                'type' => $menu->type,
-                'description' => $menu->description,
-                'created_at' => $menu->createdAt,
-                'updated_at' => $menu->updatedAt,
-                'app_name' => $menu->appName,
+                'name' => $navigation->name,
+                'type' => $navigation->type,
+                'description' => $navigation->description,
+                'created_at' => $navigation->createdAt,
+                'updated_at' => $mnavigationenu->updatedAt,
+                'app_name' => $navigation->appName,
             ])->execute();
 
         $this->invalidateCache();
@@ -1232,9 +1232,9 @@ class DbManager extends BaseManager
     /**
      * 更新一个菜单
      * @param $name 要更新的菜单名
-     * @param $menu 菜单对象
+     * @param $navigation 菜单对象
      */
-    protected function updateMenu($name, $menu)
+    protected function updateNavigation($name, $navigation)
     {
         $menu->updatedAt = time();
 
@@ -1256,12 +1256,12 @@ class DbManager extends BaseManager
 
     /**
      * 删除一个菜单
-     * @param $menu 要删除菜单对象
+     * @param $navigation 要删除菜单对象
      */
-    protected function removeMenu($menu)
+    protected function removeNavigation($navigation)
     {
         $this->db->createCommand()
-            ->delete($this->menuTable, ['name' => $menu->name])
+            ->delete($this->menuTable, ['name' => $navigation->name])
             ->execute();
 
         $this->invalidateCache();
@@ -1309,5 +1309,27 @@ class DbManager extends BaseManager
         }
 
         return $menus;
+    }
+
+    /**
+     * 获取指定应用的全部菜单或操作
+     * @param $type 1:角色 2权限
+     * @param $application 指定的应用
+     */
+    protected function getNavigations($type,$application)
+    {
+        $query = (new Query)
+            ->from($this->menuTable)
+            ->where([
+                'type' => $type,
+                'app_name' => $application->appName,
+            ]);
+
+        $items = [];
+        foreach ($query->all($this->db) as $row) {
+            $items[$row['name']] = $this->populateItem($row);
+        }
+
+        return $items;
     }
 }

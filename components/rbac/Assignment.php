@@ -5,7 +5,7 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace yii\rbac;
+namespace app\components\rbac;
 
 use Yii;
 use yii\base\Object;
