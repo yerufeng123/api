@@ -66,6 +66,10 @@ class DbManager extends BaseManager
      */
     public $menuTable = '{{%auth_menu}}';
     /**
+     * @var string 菜单操作关联表
+     */
+    public $menuChildTable = '{{%auth_menu_child}}';
+    /**
      * @var string 应用表
      */
     public $applicationTable = '{{%auth_application}}';
@@ -1269,51 +1273,36 @@ class DbManager extends BaseManager
         return true;
     }
 
+    
+
     /**
-     * 获取一个菜单
-     * @param $params array 参数
+     * @inheritdoc
      */
-    protected function getMenuOne($params)
+    protected function getNavigation($name)
     {
-        if (empty($params)) {
+        if (empty($name)) {
             return null;
         }
 
-        if (isset($params['name']) && !empty($params['name']) && !empty($this->menus[$params['name']])) {
-            return $this->params[$params['name']];
+        if (!empty($this->navigations[$name])) {
+            return $this->navigations[$name];
         }
 
         $row = (new Query)->from($this->menuTable)
-            ->where($params)
+            ->where(['name' => $name])
             ->one($this->db);
 
         if ($row === false) {
             return null;
         }
 
-        return $this->populateMenu($row);
+        return $this->populateNavigation($row);
     }
 
-    /**
-     * 获取多个应用
-     */
-    protected function getMenuMore($params)
-    {
-        $query = (new Query)
-            ->from($this->menuTable)
-            ->where($params);
-
-        $menus = [];
-        foreach ($query->all($this->db) as $row) {
-            $menus[$row['name']] = $this->populateMenu($row);
-        }
-
-        return $menus;
-    }
 
     /**
      * 获取指定应用的全部菜单或操作
-     * @param $type 1:角色 2权限
+     * @param $type 1:菜单 2操作
      * @param $application 指定的应用
      */
     protected function getNavigations($type,$application)
@@ -1325,11 +1314,32 @@ class DbManager extends BaseManager
                 'app_name' => $application->appName,
             ]);
 
-        $items = [];
+        $navigations = [];
         foreach ($query->all($this->db) as $row) {
-            $items[$row['name']] = $this->populateItem($row);
+            $navigations[$row['name']] = $this->populateNavigation($row);
         }
 
-        return $items;
+        return $navigations;
+    }
+
+    /**
+     * 获取指定菜单的全部操作
+     * @param $type 1:菜单 2操作
+     * @param $application 指定的应用
+     */
+    protected function getNavigationsByMenu($menu)
+    {
+        $query = (new Query)
+            ->from($this->menuChildTable)
+            ->where([
+                'parent' => $menu->name,
+            ]);
+
+        $navigations = [];
+        foreach ($query->all($this->db) as $row) {
+            $navigations[$row['child']] = $this->getNavigation($row['child']);
+        }
+
+        return $navigations;
     }
 }

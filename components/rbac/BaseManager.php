@@ -123,6 +123,13 @@ abstract class BaseManager extends Component implements ManagerInterface
     abstract protected function getNavigations($type,$application);
 
     /**
+     * 返回指定菜单的全部操作
+     * @param string $menu 菜单对象
+     * @return 返回全部指定条件的操作，如果没有这样的操作就返回null.
+     */
+    abstract protected function getNavigationsByMenu($menu);
+
+    /**
      * @inheritdoc
      */
     public function createApplication($name,$userId)
@@ -303,9 +310,7 @@ abstract class BaseManager extends Component implements ManagerInterface
      */
     public function getOperates($menu)
     {
-        /**
-         *@todo :获取菜单下所属操作
-         */
+        return $this->getNavigationsByMenu($menu);
     }
 
     /**
@@ -333,25 +338,6 @@ abstract class BaseManager extends Component implements ManagerInterface
      */
     public function getApplicationsByUser($userId){
         return $this->getApplicationMore(['user_id' => $userId]);
-    }
-
-    /**
-     * 返回指定名称的菜单
-     * @param string $name 菜单名
-     * @return 返回一个菜单对象，如果该菜单不存在就返回null
-     */
-    public function getMenuByName($name){
-        $menu = $this->getMenuOne(['name' => $name]);
-        return $menu instanceof Menu ? $menu : null;
-    }
-
-    /**
-     * 返回指定名称的菜单
-     * @param string $name 菜单名
-     * @return 返回一个菜单对象，如果该菜单不存在就返回null
-     */
-    public function getMenusByApplicationName($appName){
-        return $this->getMenuMore(['app_name' => $appName]);
     }
 
 
