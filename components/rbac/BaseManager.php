@@ -293,7 +293,7 @@ abstract class BaseManager extends Component implements ManagerInterface
      */
     public function getMenuList($application)
     {
-        return $this->getMenusByApplicationName($application->appName);
+        return $this->getMenusByApplicationName($application->name);
     }
 
 

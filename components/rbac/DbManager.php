@@ -505,7 +505,9 @@ class DbManager extends BaseManager
      */
     protected function populateMenu($row)
     {
-        return new Menu([
+        $class = $row['type'] == Menu::TYPE_NAVIGATION ? Navigation::className() : Operate::className();
+
+        return new $class([
             'name' => $row['name'],
             'type' => $row['type'],
             'style' => $row['style'],
@@ -985,7 +987,7 @@ class DbManager extends BaseManager
             return true;
         }
         foreach ($this->getMenuChildren($child->name) as $grandchild) {
-            if ($this->getMenuChildren($parent, $grandchild)) {
+            if ($this->detectMenuLoop($parent, $grandchild)) {
                 return true;
             }
         }
@@ -1450,15 +1452,19 @@ class DbManager extends BaseManager
          *@todo::递归查找对性能损耗太大，后期改为从缓存获取
          */
         $query = (new Query)
-            ->from($this->auth_menu_child)
+            ->from($this->menuChildTable)
             ->where([
                 'parent' => $menu->name,
             ]);
-    
         foreach ($query->all($this->db) as $row) {
-            $result[$row['name']]=$row;
-            if($row['type']=Menu::TYPE_NAVIGATION){
-                $this->getChildMenusRecursive($row,$result[$row['name']]);
+            $child=$this->getMenu(['name' => $row['child']]);
+            if(!$child){
+                continue;
+            }
+            $result[$row['parent']]['childlist'][$row['child']]['self']=$child;
+            if($child->type == Menu::TYPE_NAVIGATION){
+                var_dump($result);var_dump($child->name);die;
+                $this->getChildMenusRecursive($child,$result[$row['parent']]['childlist']);
             }
         }
     }
@@ -1471,13 +1477,19 @@ class DbManager extends BaseManager
      */
     protected function getMenusByApplicationName($appName)
     {
+        echo '<pre>';
         $menus=$this->getMenus([
             'app_name' => $appName,
             'type' => Menu::TYPE_NAVIGATION,
         ]);
+        $menulist=[];
         foreach ($menus as $row) {
-            $this->getChildMenusRecursive($row,$menus);
+            $menulist[$row->name]['self']=$row;
         }
-        return $menus;
+        foreach ($menus as $row) {
+            $this->getChildMenusRecursive($row,$menulist);
+        }
+        var_dump($menulist);die;
+        return $menulist;
     }
 }

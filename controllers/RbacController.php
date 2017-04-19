@@ -27,19 +27,16 @@ class RbacController extends BaseController
         //$auth->add($menu04);
         //$auth->add($operate05);
         //追加菜单2到菜单1,追加操作3到菜单2，追加操作5到菜单2
-        $menu01=$auth->getNavigation('menu01');
-        $menu02=$auth->getNavigation('menu02');
-        $menu04=$auth->getNavigation('menu04');
-        $operate03=$auth->getOperate('operate03');
-        $operate05=$auth->getOperate('operate05');
+        //$menu01=$auth->getNavigation('menu01');
+        //$menu02=$auth->getNavigation('menu02');
+        //$menu04=$auth->getNavigation('menu04');
+        //$operate03=$auth->getOperate('operate03');
+        //$operate05=$auth->getOperate('operate05');
         //$auth->addMenuChild($menu01,$menu02);
         //$auth->addMenuChild($menu02,$operate03);
         //$auth->addMenuChild($menu02,$operate05);
-        $auth->addMenuChild($operate03,$menu01);
-        die;
-
-        
-        var_dump($application);die;
+        $menulist=$auth->getMenuList($application);
+        var_dump($menulist);die;
 
         // 添加 "createPost" 权限
         $createPost = $auth->createPermission('createPost',$application->name);
