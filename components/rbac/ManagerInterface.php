@@ -26,12 +26,20 @@ interface ManagerInterface extends CheckAccessInterface
     public function createApplication($name,$userId);
 
     /**
-     * Creates a new Menu object.
+     * Creates a new Navigation object.
      * @param string $name the menu name
      * @param string $appName the application name
      * @return Permission the new Menu object
      */
-    public function createMenu($name,$appName);
+    public function createNavigation($name,$appName);
+
+    /**
+     * Creates a new Operate object.
+     * @param string $name the menu name
+     * @param string $appName the application name
+     * @return Permission the new Menu object
+     */
+    public function createOperate($name,$appName);
 
     /**
      * Creates a new Role object.
@@ -88,7 +96,7 @@ interface ManagerInterface extends CheckAccessInterface
      * Returns all roles in the system.
      * @return Role[] all roles in the system. The array is indexed by the role names.
      */
-    public function getRoles();
+    public function getRoles($application);
 
     /**
      * Returns the roles that are assigned to the user via [[assign()]].
@@ -119,7 +127,7 @@ interface ManagerInterface extends CheckAccessInterface
      * Returns all permissions in the system.
      * @return Permission[] all permissions in the system. The array is indexed by the permission names.
      */
-    public function getPermissions();
+    public function getPermissions($application);
 
     /**
      * Returns all permissions that the specified role represents.

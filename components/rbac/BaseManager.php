@@ -27,7 +27,6 @@ abstract class BaseManager extends Component implements ManagerInterface
      */
     public $defaultRoles = [];
 
-
     /**
      * Returns the named auth item.
      * @param string $name the auth item name.
@@ -98,36 +97,28 @@ abstract class BaseManager extends Component implements ManagerInterface
      * @param string $params 检索的条件.
      * @return 返回一个指定条件的应用，如果没有这样的应用就返回null.
      */
-    abstract protected function getApplicationOne($params);
+    abstract protected function getApplication($params);
 
     /**
      * 根据条件返回多个应用
      * @param string $params 检索的条件.
      * @return 返回全部指定条件的应用，如果没有这样的应用就返回null.
      */
-    abstract protected function getApplicationMore($params);
+    abstract protected function getApplications($params);
 
     /**
-     * 返回一个菜单（操作）
-     * @param string $name 菜单(操作)名
-     * @return 返回一个指定条件的菜单，如果没有这样的菜单就返回null.
+     * 返回一个导航(操作）
+     * @param array $params 检索的条件.
+     * @return 返回一个指定条件的导航(操作)，如果没有这样的导航(操作)就返回null.
      */
-    abstract protected function getNavigation($name);
+    abstract protected function getMenu($params);
 
     /**
-     * 根据条件返回全部菜单(操作)
-     * @param string $type 检索类型 1：菜单 2：操作
-     * @param string $application 应用对象
-     * @return 返回全部指定条件的菜单，如果没有这样的菜单就返回null.
+     * 根据条件返回全部导航(操作)
+     * @param array $params 检索的条件.
+     * @return 返回全部指定条件的导航(操作)，如果没有这样的导航(操作)就返回null.
      */
-    abstract protected function getNavigations($type,$application);
-
-    /**
-     * 返回指定菜单的全部操作
-     * @param string $menu 菜单对象
-     * @return 返回全部指定条件的操作，如果没有这样的操作就返回null.
-     */
-    abstract protected function getNavigationsByMenu($menu);
+    abstract protected function getMenus($params);
 
     /**
      * @inheritdoc
@@ -143,12 +134,12 @@ abstract class BaseManager extends Component implements ManagerInterface
     /**
      * @inheritdoc
      */
-    public function createMenu($name,$appName)
+    public function createNavigation($name,$appName)
     {
-        $menu = new Menu();
-        $menu->name = $name;
-        $menu->appName=$appName;
-        return $menu;
+        $navigation = new Navigation();
+        $navigation->name = $name;
+        $navigation->appName=$appName;
+        return $navigation;
     }
 
     public function createOperate($name,$appName)
@@ -268,7 +259,7 @@ abstract class BaseManager extends Component implements ManagerInterface
      */
     public function getRoles($application)
     {
-        return $this->getItems(Item::TYPE_ROLE,$application);
+        return $this->getItems(Item::TYPE_ROLE,$application->appName);
     }
 
     /**
@@ -276,16 +267,16 @@ abstract class BaseManager extends Component implements ManagerInterface
      */
     public function getPermissions($application)
     {
-        return $this->getItems(Item::TYPE_PERMISSION,$application);
+        return $this->getItems(Item::TYPE_PERMISSION,$application->appName);
     }
 
     /**
      * @inheritdoc
      */
-    public function getMenu($name)
+    public function getNavigation($name)
     {
-        $menu = $this->getNavigation($name);
-        return $menu instanceof Menu && $menu->type == Navigation::TYPE_MENU ? $menu : null;
+        $menu = $this->getMenu(['name' => $name]);
+        return $menu instanceof Menu && $menu->type == Menu::TYPE_NAVIGATION ? $menu : null;
     }
 
     /**
@@ -293,25 +284,18 @@ abstract class BaseManager extends Component implements ManagerInterface
      */
     public function getOperate($name)
     {
-        $operate = $this->getNavigation($name);
-        return $operate instanceof Operate && $operate->type == Operate::TYPE_OPERATE ? $operate : null;
+        $menu = $this->getMenu(['name' => $name]);
+        return $menu instanceof Menu && $menu->type == Menu::TYPE_OPERATE ? $menu : null;
     }
 
     /**
      * @inheritdoc
      */
-    public function getMenus($application)
+    public function getMenuList($application)
     {
-        return $this->getNavigations(Navigation::TYPE_MENU,$application);
+        return $this->getMenusByApplicationName($application->appName);
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function getOperates($menu)
-    {
-        return $this->getNavigationsByMenu($menu);
-    }
 
     /**
      * Returns the named application.
@@ -319,7 +303,7 @@ abstract class BaseManager extends Component implements ManagerInterface
      * @return Application the auth items of the specified type.
      */
     public function getApplicationByName($name){
-        $application = $this->getApplicationOne(['name' => $name]);
+        $application = $this->getApplication(['name' => $name]);
         return $application instanceof Application ? $application : null;
     }
 
@@ -327,8 +311,8 @@ abstract class BaseManager extends Component implements ManagerInterface
      * Returns the  applications.
      * @return Application[] the applications.
      */
-    public function getApplications(){
-        return $this->getApplicationMore([]);
+    public function getApplicationAll(){
+        return $this->getApplications([]);
     }
 
     /**
@@ -337,7 +321,7 @@ abstract class BaseManager extends Component implements ManagerInterface
      * @return Application[] the auth item of the specified user idd.
      */
     public function getApplicationsByUser($userId){
-        return $this->getApplicationMore(['user_id' => $userId]);
+        return $this->getApplications(['user_id' => $userId]);
     }
 
 

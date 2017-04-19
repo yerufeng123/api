@@ -100,7 +100,10 @@ class DbManager extends BaseManager
      * @since 2.0.3
      */
     public $cacheKey = 'rbac';
-
+    /**
+     * @var 当前应用
+     */
+    public $currentApplication=null;
     /**
      * @var Item[] all auth items (name => Item)
      */
@@ -438,13 +441,13 @@ class DbManager extends BaseManager
      * @param $type 1:角色 2权限
      * @param $application 指定的应用
      */
-    protected function getItems($type,$application)
+    protected function getItems($type,$appName)
     {
         $query = (new Query)
             ->from($this->itemTable)
             ->where([
                 'type' => $type,
-                'app_name' => $application->appName,
+                'app_name' => $appName,
             ]);
 
         $items = [];
@@ -500,11 +503,13 @@ class DbManager extends BaseManager
      * @param array $row 菜单表的一条数据
      * @return Menu the populated auth menu instance 
      */
-    protected function populateNavigation($row)
+    protected function populateMenu($row)
     {
-        return new Navigation([
+        return new Menu([
             'name' => $row['name'],
             'type' => $row['type'],
+            'style' => $row['style'],
+            'url' => $row['style'],
             'description' => $row['description'],
             'createdAt' => $row['created_at'],
             'updatedAt' => $row['updated_at'],
@@ -784,6 +789,11 @@ class DbManager extends BaseManager
         return !$this->detectLoop($parent, $child);
     }
 
+    public function canAddMenuChild($parent, $child)
+    {
+        return !$this->detectMenuLoop($parent, $child);
+    }
+
     /**
      * @inheritdoc
      */
@@ -813,10 +823,50 @@ class DbManager extends BaseManager
     /**
      * @inheritdoc
      */
+    public function addMenuChild($parent, $child)
+    {
+        if ($parent->name === $child->name) {
+            throw new InvalidParamException("Cannot add '{$parent->name}' as a child of itself.");
+        }
+
+        if ($parent instanceof Operate && $child instanceof Navigation) {
+            throw new InvalidParamException('Cannot add a operate as a child of a navigation.');
+        }
+
+        if ($this->detectMenuLoop($parent, $child)) {
+            throw new InvalidCallException("Cannot add '{$child->name}' as a child of '{$parent->name}'. A loop has been detected.");
+        }
+
+        $this->db->createCommand()
+            ->insert($this->menuChildTable, ['parent' => $parent->name, 'child' => $child->name])
+            ->execute();
+
+        $this->invalidateCache();
+
+        return true;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function removeChild($parent, $child)
     {
         $result = $this->db->createCommand()
             ->delete($this->itemChildTable, ['parent' => $parent->name, 'child' => $child->name])
+            ->execute() > 0;
+
+        $this->invalidateCache();
+
+        return $result;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function removeMenuChild($parent, $child)
+    {
+        $result = $this->db->createCommand()
+            ->delete($this->menuChildTable, ['parent' => $parent->name, 'child' => $child->name])
             ->execute() > 0;
 
         $this->invalidateCache();
@@ -841,10 +891,35 @@ class DbManager extends BaseManager
     /**
      * @inheritdoc
      */
+    public function removeMenuChildren($parent)
+    {
+        $result = $this->db->createCommand()
+            ->delete($this->menuChildTable, ['parent' => $parent->name])
+            ->execute() > 0;
+
+        $this->invalidateCache();
+
+        return $result;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function hasChild($parent, $child)
     {
         return (new Query)
             ->from($this->itemChildTable)
+            ->where(['parent' => $parent->name, 'child' => $child->name])
+            ->one($this->db) !== false;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function hasMenuChild($parent, $child)
+    {
+        return (new Query)
+            ->from($this->menuChildTable)
             ->where(['parent' => $parent->name, 'child' => $child->name])
             ->one($this->db) !== false;
     }
@@ -868,6 +943,24 @@ class DbManager extends BaseManager
     }
 
     /**
+     * @inheritdoc
+     */
+    public function getMenuChildren($name)
+    {
+        $query = (new Query)
+            ->select(['name', 'type', 'style', 'url', 'description', 'created_at', 'updated_at', 'app_name'])
+            ->from([$this->menuTable, $this->menuChildTable])
+            ->where(['parent' => $name, 'name' => new Expression('[[child]]')]);
+
+        $children = [];
+        foreach ($query->all($this->db) as $row) {
+            $children[$row['name']] = $this->populateMenu($row);
+        }
+
+        return $children;
+    }
+
+    /**
      * Checks whether there is a loop in the authorization item hierarchy.
      * @param Item $parent the parent item
      * @param Item $child the child item to be added to the hierarchy
@@ -880,6 +973,19 @@ class DbManager extends BaseManager
         }
         foreach ($this->getChildren($child->name) as $grandchild) {
             if ($this->detectLoop($parent, $grandchild)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected function detectMenuLoop($parent, $child)
+    {
+        if ($child->name === $parent->name) {
+            return true;
+        }
+        foreach ($this->getMenuChildren($child->name) as $grandchild) {
+            if ($this->getMenuChildren($parent, $grandchild)) {
                 return true;
             }
         }
@@ -1024,6 +1130,8 @@ class DbManager extends BaseManager
             $this->items = null;
             $this->rules = null;
             $this->parents = null;
+            $this->applications=null;
+            $this->menus=null;
         }
     }
 
@@ -1039,7 +1147,7 @@ class DbManager extends BaseManager
             return;
         }
 
-        $query = (new Query)->from($this->itemTable);
+        $query = (new Query)->from($this->itemTable)->where(['app_name' => $this->application->appName]);
         $this->items = [];
         foreach ($query->all($this->db) as $row) {
             $this->items[$row['name']] = $this->populateItem($row);
@@ -1166,7 +1274,7 @@ class DbManager extends BaseManager
      * 获取一个应用
      * @param $params array 参数
      */
-    protected function getApplicationOne($params)
+    protected function getApplication($params)
     {
         if (empty($params)) {
             return null;
@@ -1190,7 +1298,7 @@ class DbManager extends BaseManager
     /**
      * 获取多个应用
      */
-    protected function getApplicationMore($params)
+    protected function getApplications($params)
     {
         $query = (new Query)
             ->from($this->applicationTable)
@@ -1207,25 +1315,25 @@ class DbManager extends BaseManager
 
     /**
      * 添加一个菜单
-     * $navigation 要添加的菜单对象
+     * $menu 要添加的菜单对象
      */
-    protected function addNavigation($navigation)
+    protected function addMenu($menu)
     {
         $time = time();
-        if ($navigation->createdAt === null) {
-            $navigation->createdAt = $time;
+        if ($menu->createdAt === null) {
+            $menu->createdAt = $time;
         }
-        if ($navigation->updatedAt === null) {
-            $navigation->updatedAt = $time;
+        if ($menu->updatedAt === null) {
+            $menu->updatedAt = $time;
         }
         $this->db->createCommand()
             ->insert($this->menuTable, [
-                'name' => $navigation->name,
-                'type' => $navigation->type,
-                'description' => $navigation->description,
-                'created_at' => $navigation->createdAt,
-                'updated_at' => $mnavigationenu->updatedAt,
-                'app_name' => $navigation->appName,
+                'name' => $menu->name,
+                'type' => $menu->type,
+                'description' => $menu->description,
+                'created_at' => $menu->createdAt,
+                'updated_at' => $mmenuenu->updatedAt,
+                'app_name' => $menu->appName,
             ])->execute();
 
         $this->invalidateCache();
@@ -1236,10 +1344,18 @@ class DbManager extends BaseManager
     /**
      * 更新一个菜单
      * @param $name 要更新的菜单名
-     * @param $navigation 菜单对象
+     * @param $menu 菜单对象
      */
-    protected function updateNavigation($name, $navigation)
+    protected function updateMenu($name, $menu)
     {
+        if ($menu->name !== $name && !$this->supportsCascadeUpdate()) {
+            $this->db->createCommand()
+                ->update($this->menuChildTable, ['parent' => $menu->name], ['parent' => $name])
+                ->execute();
+            $this->db->createCommand()
+                ->update($this->itemChildTable, ['child' => $menu->name], ['child' => $name])
+                ->execute();
+        }
         $menu->updatedAt = time();
 
         $this->db->createCommand()
@@ -1260,12 +1376,17 @@ class DbManager extends BaseManager
 
     /**
      * 删除一个菜单
-     * @param $navigation 要删除菜单对象
+     * @param $menu 要删除菜单对象
      */
-    protected function removeNavigation($navigation)
+    protected function removeMenu($menu)
     {
+        if (!$this->supportsCascadeUpdate()) {
+            $this->db->createCommand()
+                ->delete($this->menuChildTable, ['or', '[[parent]]=:name', '[[child]]=:name'], [':name' => $menu->name])
+                ->execute();
+        }
         $this->db->createCommand()
-            ->delete($this->menuTable, ['name' => $navigation->name])
+            ->delete($this->menuTable, ['name' => $menu->name])
             ->execute();
 
         $this->invalidateCache();
@@ -1278,68 +1399,85 @@ class DbManager extends BaseManager
     /**
      * @inheritdoc
      */
-    protected function getNavigation($name)
+    protected function getMenu($params)
     {
-        if (empty($name)) {
+        if (empty($params['name'])) {
             return null;
         }
 
-        if (!empty($this->navigations[$name])) {
-            return $this->navigations[$name];
+        if (isset($params['name']) && !empty($params['name']) && !empty($this->menus[$params['name']])) {
+            return $this->menus[$params['name']];
         }
 
         $row = (new Query)->from($this->menuTable)
-            ->where(['name' => $name])
+            ->where($params)
             ->one($this->db);
 
         if ($row === false) {
             return null;
         }
 
-        return $this->populateNavigation($row);
+        return $this->populateMenu($row);
     }
 
 
     /**
-     * 获取指定应用的全部菜单或操作
-     * @param $type 1:菜单 2操作
-     * @param $application 指定的应用
+     * @inheritdoc
      */
-    protected function getNavigations($type,$application)
+    protected function getMenus($params)
     {
         $query = (new Query)
             ->from($this->menuTable)
-            ->where([
-                'type' => $type,
-                'app_name' => $application->appName,
-            ]);
+            ->where($params);
 
-        $navigations = [];
+        $menus = [];
         foreach ($query->all($this->db) as $row) {
-            $navigations[$row['name']] = $this->populateNavigation($row);
+            $menus[$row['name']] = $this->populateMenu($row);
         }
 
-        return $navigations;
+        return $menus;
     }
 
     /**
-     * 获取指定菜单的全部操作
-     * @param $type 1:菜单 2操作
-     * @param $application 指定的应用
+     * 递归获取菜单下的子菜单和操作
      */
-    protected function getNavigationsByMenu($menu)
+    /**
+     * @inheritdoc
+     */
+    protected function getChildMenusRecursive($menu,&$result)
     {
+        /**
+         *@todo::递归查找对性能损耗太大，后期改为从缓存获取
+         */
         $query = (new Query)
-            ->from($this->menuChildTable)
+            ->from($this->auth_menu_child)
             ->where([
                 'parent' => $menu->name,
             ]);
-
-        $navigations = [];
+    
         foreach ($query->all($this->db) as $row) {
-            $navigations[$row['child']] = $this->getNavigation($row['child']);
+            $result[$row['name']]=$row;
+            if($row['type']=Menu::TYPE_NAVIGATION){
+                $this->getChildMenusRecursive($row,$result[$row['name']]);
+            }
         }
+    }
 
-        return $navigations;
+    /**
+     * 获取指定应用下的全部菜单和操作
+     */
+    /**
+     * @inheritdoc
+     */
+    protected function getMenusByApplicationName($appName)
+    {
+        $menus=$this->getMenus([
+            'app_name' => $appName,
+            'type' => Menu::TYPE_NAVIGATION,
+        ]);
+        foreach ($menus as $row) {
+            $this->getChildMenusRecursive($row,$menus);
+        }
+        return $menus;
     }
 }

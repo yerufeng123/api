@@ -16,12 +16,27 @@ class RbacController extends BaseController
         //$application=$auth->createApplication('test_appname',$userId);
         //$auth->add($application);
         $application=$auth->getApplicationByName('test_appname');
-        var_dump($application);die;
-        //创建一个菜单
-        $menu01=$auth->createMenu('menu01',$application->name);
-        $menu02=$auth->createMenu('menu02',$application->name);
-        $auth->add($menu01);
-        $auth->add($menu02);die;
+        //var_dump($application);die;
+        //创建两个导航菜单，一个操作菜单
+        //$menu01=$auth->createNavigation('menu01',$application->name);
+        //$menu02=$auth->createNavigation('menu02',$application->name);
+        //$operate03=$auth->createOperate('operate03',$application->name);
+        //$menu04=$auth->createNavigation('menu04',$application->name);
+        //$operate05=$auth->createOperate('operate05',$application->name);
+        //$auth->add($operate03);
+        //$auth->add($menu04);
+        //$auth->add($operate05);
+        //追加菜单2到菜单1,追加操作3到菜单2，追加操作5到菜单2
+        $menu01=$auth->getNavigation('menu01');
+        $menu02=$auth->getNavigation('menu02');
+        $menu04=$auth->getNavigation('menu04');
+        $operate03=$auth->getOperate('operate03');
+        $operate05=$auth->getOperate('operate05');
+        //$auth->addMenuChild($menu01,$menu02);
+        //$auth->addMenuChild($menu02,$operate03);
+        //$auth->addMenuChild($menu02,$operate05);
+        $auth->addMenuChild($operate03,$menu01);
+        die;
 
         
         var_dump($application);die;

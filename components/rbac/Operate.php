@@ -7,7 +7,7 @@
 
 namespace app\components\rbac;
 
-class Operate extends Navigation
+class Operate extends Menu
 {
-    public $type = self::TYPE::OPERATE;
+    public $type = self::TYPE_OPERATE;
 }
