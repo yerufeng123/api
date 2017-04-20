@@ -564,6 +564,26 @@ class DbManager extends BaseManager
         return $roles;
     }
 
+    public function getChildMenus($menuName)
+    {
+        $menu = $this->getMenu($menuName);
+
+        if (is_null($menu)) {
+            throw new InvalidParamException("Menu \"$menuName\" not found.");
+        }
+
+        $result = [];
+        $this->getChildrenRecursive($menuName, $this->getChildrenMenuList(), $result);
+
+        $menus = [$menuName => $menu];
+
+        $roles += array_filter($this->getRoles(), function (Role $roleItem) use ($result) {
+            return array_key_exists($roleItem->name, $result);
+        });
+
+        return $roles;
+    }
+
     /**
      * @inheritdoc
      */
@@ -663,6 +683,21 @@ class DbManager extends BaseManager
     protected function getChildrenList()
     {
         $query = (new Query)->from($this->itemChildTable);
+        $parents = [];
+        foreach ($query->all($this->db) as $row) {
+            $parents[$row['parent']][] = $row['child'];
+        }
+        return $parents;
+    }
+
+    /**
+     * Returns the children for every parent.
+     * @return array the children list. Each array key is a parent item name,
+     * and the corresponding array value is a list of child item names.
+     */
+    protected function getChildrenMenuList()
+    {
+        $query = (new Query)->from($this->menuChildTable);
         $parents = [];
         foreach ($query->all($this->db) as $row) {
             $parents[$row['parent']][] = $row['child'];
@@ -1446,25 +1481,21 @@ class DbManager extends BaseManager
     /**
      * @inheritdoc
      */
-    protected function getChildMenusRecursive($menu,&$result)
+    protected function getChildMenusRecursive($menu,$childrenList,&$result)
     {
         /**
          *@todo::递归查找对性能损耗太大，后期改为从缓存获取
          */
-        $query = (new Query)
-            ->from($this->menuChildTable)
-            ->where([
-                'parent' => $menu->name,
-            ]);
-        foreach ($query->all($this->db) as $row) {
-            $child=$this->getMenu(['name' => $row['child']]);
-            if(!$child){
-                continue;
-            }
-            $result[$row['parent']]['childlist'][$row['child']]['self']=$child;
-            if($child->type == Menu::TYPE_NAVIGATION){
-                var_dump($result);var_dump($child->name);die;
-                $this->getChildMenusRecursive($child,$result[$row['parent']]['childlist']);
+        if($menuchildrens=isset($childrenList[$menu->name]) ? $childrenList[$menu->name] : []){
+            foreach($menuchildrens as $row){
+                $child=$this->getMenu(['name' => $row]);
+                if(!$child){
+                    continue;
+                }
+                $result[$menu->name]['childlist'][$row]['self']=$child;
+                if($child->type == Menu::TYPE_NAVIGATION){
+                    $this->getChildMenusRecursive($child,$childrenList,$result[$menu->name]['childlist']);
+                }
             }
         }
     }
@@ -1486,8 +1517,8 @@ class DbManager extends BaseManager
         foreach ($menus as $row) {
             $menulist[$row->name]['self']=$row;
         }
-        foreach ($menus as $row) {
-            $this->getChildMenusRecursive($row,$menulist);
+        foreach ($menulist as $row) {
+            $this->getChildMenusRecursive($row['self'],$this->getChildrenMenuList(),$menulist);
         }
         var_dump($menulist);die;
         return $menulist;
