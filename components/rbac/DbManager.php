@@ -101,10 +101,6 @@ class DbManager extends BaseManager
      */
     public $cacheKey = 'rbac';
     /**
-     * @var 当前应用
-     */
-    public $currentApplication=null;
-    /**
      * @var Item[] all auth items (name => Item)
      */
     protected $items;
@@ -243,6 +239,16 @@ class DbManager extends BaseManager
     }
 
     /**
+     * Returns a value indicating whether the database supports cascading update and delete.
+     * The default implementation will return false for SQLite database and true for all other databases.
+     * @return bool whether the database supports cascading update and delete.
+     */
+    protected function supportsCascadeUpdate()
+    {
+        return strncmp($this->db->getDriverName(), 'sqlite', 6) !== 0;
+    }
+
+    /**
      * @inheritdoc
      */
     protected function getItem($name)
@@ -267,14 +273,27 @@ class DbManager extends BaseManager
     }
 
     /**
-     * Returns a value indicating whether the database supports cascading update and delete.
-     * The default implementation will return false for SQLite database and true for all other databases.
-     * @return bool whether the database supports cascading update and delete.
+     * 获取指定应用的全部角色或权限
+     * @param $type 1:角色 2权限
+     * @param $application 指定的应用
      */
-    protected function supportsCascadeUpdate()
+    protected function getItems($type,$appName)
     {
-        return strncmp($this->db->getDriverName(), 'sqlite', 6) !== 0;
+        $query = (new Query)
+            ->from($this->itemTable)
+            ->where([
+                'type' => $type,
+                'app_name' => $appName,
+            ]);
+
+        $items = [];
+        foreach ($query->all($this->db) as $row) {
+            $items[$row['name']] = $this->populateItem($row);
+        }
+
+        return $items;
     }
+
 
     /**
      * @inheritdoc
@@ -331,7 +350,7 @@ class DbManager extends BaseManager
     /**
      * @inheritdoc
      */
-    protected function updateItem($application, $name, $item)
+    protected function updateItem($name, $item)
     {
         if ($item->name !== $name && !$this->supportsCascadeUpdate()) {
             $this->db->createCommand()
@@ -362,6 +381,53 @@ class DbManager extends BaseManager
         $this->invalidateCache();
 
         return true;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getRule($name)
+    {
+        if ($this->rules !== null) {
+            return isset($this->rules[$name]) ? $this->rules[$name] : null;
+        }
+
+        $row = (new Query)->select(['data'])
+            ->from($this->ruleTable)
+            ->where(['name' => $name])
+            ->one($this->db);
+        if ($row === false) {
+            return null;
+        }
+        $data = $row['data'];
+        if (is_resource($data)) {
+            $data = stream_get_contents($data);
+        }
+        return unserialize($data);
+
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getRules()
+    {
+        if ($this->rules !== null) {
+            return $this->rules;
+        }
+
+        $query = (new Query)->from($this->ruleTable);
+
+        $rules = [];
+        foreach ($query->all($this->db) as $row) {
+            $data = $row['data'];
+            if (is_resource($data)) {
+               $data = stream_get_contents($data);
+            }
+            $rules[$row['name']] = unserialize($data);
+        }
+
+        return $rules;
     }
 
     /**
@@ -434,28 +500,6 @@ class DbManager extends BaseManager
         $this->invalidateCache();
 
         return true;
-    }
-
-    /**
-     * 获取指定应用的全部角色或权限
-     * @param $type 1:角色 2权限
-     * @param $application 指定的应用
-     */
-    protected function getItems($type,$appName)
-    {
-        $query = (new Query)
-            ->from($this->itemTable)
-            ->where([
-                'type' => $type,
-                'app_name' => $appName,
-            ]);
-
-        $items = [];
-        foreach ($query->all($this->db) as $row) {
-            $items[$row['name']] = $this->populateItem($row);
-        }
-
-        return $items;
     }
 
     /**
@@ -724,53 +768,6 @@ class DbManager extends BaseManager
     /**
      * @inheritdoc
      */
-    public function getRule($name)
-    {
-        if ($this->rules !== null) {
-            return isset($this->rules[$name]) ? $this->rules[$name] : null;
-        }
-
-        $row = (new Query)->select(['data'])
-            ->from($this->ruleTable)
-            ->where(['name' => $name])
-            ->one($this->db);
-        if ($row === false) {
-            return null;
-        }
-        $data = $row['data'];
-        if (is_resource($data)) {
-            $data = stream_get_contents($data);
-        }
-        return unserialize($data);
-
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getRules()
-    {
-        if ($this->rules !== null) {
-            return $this->rules;
-        }
-
-        $query = (new Query)->from($this->ruleTable);
-
-        $rules = [];
-        foreach ($query->all($this->db) as $row) {
-            $data = $row['data'];
-            if (is_resource($data)) {
-               $data = stream_get_contents($data);
-            }
-            $rules[$row['name']] = unserialize($data);
-        }
-
-        return $rules;
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function getAssignment($roleName, $userId)
     {
         if (empty($userId)) {
@@ -862,6 +859,10 @@ class DbManager extends BaseManager
      */
     public function addMenuChild($parent, $child)
     {
+        if(!$parent || !$child){
+            throw new InvalidParamException('parent or child can not is null.');
+        }
+
         if ($parent->name === $child->name) {
             throw new InvalidParamException("Cannot add '{$parent->name}' as a child of itself.");
         }
@@ -878,6 +879,12 @@ class DbManager extends BaseManager
             ->insert($this->menuChildTable, ['parent' => $parent->name, 'child' => $child->name])
             ->execute();
 
+        //当菜单添加子菜单后，就变更为下拉菜单
+        if($child instanceof Navigation){
+            $parent->style = Menu::TYPE_MENU_DOWN;
+            $parent->url = '';
+            $this->updateMenu($parent->name,$parent);
+        }
         $this->invalidateCache();
 
         return true;
@@ -1367,9 +1374,11 @@ class DbManager extends BaseManager
             ->insert($this->menuTable, [
                 'name' => $menu->name,
                 'type' => $menu->type,
+                'style' => $menu->style,
+                'url' => $menu->url,
                 'description' => $menu->description,
                 'created_at' => $menu->createdAt,
-                'updated_at' => $mmenuenu->updatedAt,
+                'updated_at' => $menu->updatedAt,
                 'app_name' => $menu->appName,
             ])->execute();
 
@@ -1399,6 +1408,8 @@ class DbManager extends BaseManager
             ->update($this->menuTable, [
                 'name' => $menu->name,
                 'type' => $menu->type,
+                'style' => $menu->style,
+                'url' => $menu->url,
                 'description' => $menu->description,
                 'updated_at' => $menu->updatedAt,
                 'app_name' => $menu->appName,
@@ -1503,24 +1514,36 @@ class DbManager extends BaseManager
     /**
      * 获取指定应用下的全部菜单和操作
      */
-    /**
-     * @inheritdoc
-     */
     protected function getMenusByApplicationName($appName)
     {
-        echo '<pre>';
         $menus=$this->getMenus([
             'app_name' => $appName,
             'type' => Menu::TYPE_NAVIGATION,
         ]);
+        //获取子菜单列表（包括操作和菜单）
+        $allchildrenlist=$this->getAllChildrenList();
+
         $menulist=[];
         foreach ($menus as $row) {
-            $menulist[$row->name]['self']=$row;
+            if(!in_array($row->name, $allchildrenlist)){
+                $menulist[$row->name]['self']=$row;
+            }
         }
         foreach ($menulist as $row) {
             $this->getChildMenusRecursive($row['self'],$this->getChildrenMenuList(),$menulist);
         }
-        var_dump($menulist);die;
+        return $menulist;
+    }
+
+    protected function getAllChildrenList(){
+        $query = (new Query)
+            ->select('child')
+            ->from($this->menuChildTable);
+
+        $menulist = [];
+        foreach($query->all($this->db) as $row){
+            $menulist[]=$row['child'];
+        }
         return $menulist;
     }
 }

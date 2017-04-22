@@ -10,4 +10,5 @@ namespace app\components\rbac;
 class Navigation extends Menu
 {
     public $type = self::TYPE_NAVIGATION;
+    public $style = self::TYPE_MENU_JUMP;
 }

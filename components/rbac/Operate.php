@@ -10,4 +10,5 @@ namespace app\components\rbac;
 class Operate extends Menu
 {
     public $type = self::TYPE_OPERATE;
+    public $style = 0;
 }

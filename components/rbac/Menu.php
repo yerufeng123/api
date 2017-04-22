@@ -19,6 +19,8 @@ class Menu extends Object
 {
     const TYPE_NAVIGATION = 1;//菜单
     const TYPE_OPERATE = 2;//操作
+    const TYPE_MENU_DOWN=1;//父级下拉菜单
+    const TYPE_MENU_JUMP=2;//子级跳转菜单
 
     /**
      * @var string 菜单名
