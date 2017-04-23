@@ -380,7 +380,7 @@ body.withmenucoll2 { background-position: 35px 0; } /* with menu style 2 in coll
 .vernav ul li.current ul li a:hover { color: #666; }
 .vernav ul li.current ul li.current a { color: #fb9337; background-color: #fff; }
 
-.vernav2 { width: 230px; position: absolute; left: 0; top: 159px; }
+.vernav2 { width: 230px; position: absolute; left: 0; top: 165px; }
 .vernav2 ul { list-style: none; margin: 0; }
 .vernav2 ul li { display: block; border-bottom: 1px solid #eee; position: relative; }
 .vernav2 ul li a { 

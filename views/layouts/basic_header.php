@@ -55,10 +55,9 @@
         
         <div class="header">
             <ul class="headermenu">
-                <li class="current"><a href="dashboard.html"><span class="icon icon-flatscreen"></span>我的权限</a></li>
-                <li><a href="manageblog.html"><span class="icon icon-pencil"></span>博客管理</a></li>
-                <li><a href="messages.html"><span class="icon icon-message"></span>查看消息</a></li>
-                <li><a href="reports.html"><span class="icon icon-chart"></span>统计报表</a></li>
+                <?php foreach ($this->params['menulist'] as $key => $value) {?>
+                    <li class=""><a href="dashboard.html"><span class="icon icon-flatscreen"></span><?= $value['self']->description ?></a></li>
+                <?php } ?>
             </ul>
             
            <div class="headerwidget">

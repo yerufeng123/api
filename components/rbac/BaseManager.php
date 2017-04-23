@@ -32,7 +32,7 @@ abstract class BaseManager extends Component implements ManagerInterface
      * @param string $name the auth item name.
      * @return Item the auth item corresponding to the specified name. Null is returned if no such item.
      */
-    abstract protected function getItem($name);
+    abstract protected function getItem($params);
 
     /**
      * Returns the items of the specified type.
@@ -40,7 +40,7 @@ abstract class BaseManager extends Component implements ManagerInterface
      * @param string $application 应用
      * @return Item[] the auth items of the specified type.
      */
-    abstract protected function getItems($type,$application);
+    abstract protected function getItems($params);
 
     /**
      * Adds an auth item to the RBAC system.
@@ -177,7 +177,7 @@ abstract class BaseManager extends Component implements ManagerInterface
      */
     public function getRole($name)
     {
-        $item = $this->getItem($name);
+        $item = $this->getItem(['name' => $name]);
         return $item instanceof Item && $item->type == Item::TYPE_ROLE ? $item : null;
     }
 
@@ -186,7 +186,7 @@ abstract class BaseManager extends Component implements ManagerInterface
      */
     public function getPermission($name)
     {
-        $item = $this->getItem($name);
+        $item = $this->getItem(['name' => $name]);
         return $item instanceof Item && $item->type == Item::TYPE_PERMISSION ? $item : null;
     }
 
@@ -195,7 +195,7 @@ abstract class BaseManager extends Component implements ManagerInterface
      */
     public function getRoles($application)
     {
-        return $this->getItems(Item::TYPE_ROLE,$application->appName);
+        return $this->getItems(['type' => Item::TYPE_ROLE,'app_name' => $application->appName]);
     }
 
     /**
@@ -203,7 +203,7 @@ abstract class BaseManager extends Component implements ManagerInterface
      */
     public function getPermissions($application)
     {
-        return $this->getItems(Item::TYPE_PERMISSION,$application->appName);
+        return $this->getItems(['type' => Item::TYPE_PERMISSION,'app_name' => $application->appName]);
     }
 
     /**

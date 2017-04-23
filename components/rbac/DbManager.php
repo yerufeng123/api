@@ -93,7 +93,7 @@ class DbManager extends BaseManager
      *
      * @since 2.0.3
      */
-    public $cache;
+    public $cache='cache';
     /**
      * @var string the key used to store RBAC data in cache
      * @see cache
@@ -120,6 +120,10 @@ class DbManager extends BaseManager
      * @var Menu[] all auth menus (name => Menu)
      */
     protected $menus;
+    /**
+     * @var MenuList[] all menulist (appname => Menulist)
+     */
+    protected $menulist;
 
 
     /**
@@ -210,7 +214,7 @@ class DbManager extends BaseManager
      */
     protected function checkAccessRecursive($user, $itemName, $params, $assignments)
     {
-        if (($item = $this->getItem($itemName)) === null) {
+        if (($item = $this->getItem(['name' => $itemName])) === null) {
             return false;
         }
 
@@ -251,18 +255,18 @@ class DbManager extends BaseManager
     /**
      * @inheritdoc
      */
-    protected function getItem($name)
+    protected function getItem($params=[])
     {
-        if (empty($name)) {
+        if (empty($params['name'])) {
             return null;
         }
 
-        if (!empty($this->items[$name])) {
-            return $this->items[$name];
+        if (isset($params['name']) && !empty($params['name']) && !empty($this->items[$params['name']])) {
+            return $this->items[$params['name']];
         }
 
         $row = (new Query)->from($this->itemTable)
-            ->where(['name' => $name])
+            ->where($params)
             ->one($this->db);
 
         if ($row === false) {
@@ -277,14 +281,14 @@ class DbManager extends BaseManager
      * @param $type 1:角色 2权限
      * @param $application 指定的应用
      */
-    protected function getItems($type,$appName)
+    protected function getItems($params=[])
     {
+        if (empty($params) && $this->items !== null) {
+            return $this->items;
+        }
         $query = (new Query)
             ->from($this->itemTable)
-            ->where([
-                'type' => $type,
-                'app_name' => $appName,
-            ]);
+            ->where($params);
 
         $items = [];
         foreach ($query->all($this->db) as $row) {
@@ -319,7 +323,7 @@ class DbManager extends BaseManager
                 'app_name' => $item->appName,
             ])->execute();
 
-        $this->invalidateCache();
+        $this->invalidateCache(['item']);
 
         return true;
     }
@@ -342,7 +346,7 @@ class DbManager extends BaseManager
             ->delete($this->itemTable, ['name' => $item->name])
             ->execute();
 
-        $this->invalidateCache();
+        $this->invalidateCache(['item','parent']);
 
         return true;
     }
@@ -378,7 +382,7 @@ class DbManager extends BaseManager
                 'name' => $name,
             ])->execute();
 
-        $this->invalidateCache();
+        $this->invalidateCache(['item','parent']);
 
         return true;
     }
@@ -450,7 +454,7 @@ class DbManager extends BaseManager
                 'updated_at' => $rule->updatedAt,
             ])->execute();
 
-        $this->invalidateCache();
+        $this->invalidateCache(['rule']);
 
         return true;
     }
@@ -477,7 +481,7 @@ class DbManager extends BaseManager
                 'name' => $name,
             ])->execute();
 
-        $this->invalidateCache();
+        $this->invalidateCache(['rule']);
 
         return true;
     }
@@ -497,7 +501,7 @@ class DbManager extends BaseManager
             ->delete($this->ruleTable, ['name' => $rule->name])
             ->execute();
 
-        $this->invalidateCache();
+        $this->invalidateCache(['rule']);
 
         return true;
     }
@@ -555,7 +559,7 @@ class DbManager extends BaseManager
             'name' => $row['name'],
             'type' => $row['type'],
             'style' => $row['style'],
-            'url' => $row['style'],
+            'url' => $row['url'],
             'description' => $row['description'],
             'createdAt' => $row['created_at'],
             'updatedAt' => $row['updated_at'],
@@ -841,6 +845,11 @@ class DbManager extends BaseManager
             throw new InvalidParamException('Cannot add a role as a child of a permission.');
         }
 
+        //禁掉权限继承，不让权限包含权限
+        if ($parent instanceof Permission && $child instanceof Permission) {
+            throw new InvalidParamException('Cannot add a permission as a child of a permission.');
+        }
+
         if ($this->detectLoop($parent, $child)) {
             throw new InvalidCallException("Cannot add '{$child->name}' as a child of '{$parent->name}'. A loop has been detected.");
         }
@@ -849,7 +858,7 @@ class DbManager extends BaseManager
             ->insert($this->itemChildTable, ['parent' => $parent->name, 'child' => $child->name])
             ->execute();
 
-        $this->invalidateCache();
+        $this->invalidateCache(['parent']);
 
         return true;
     }
@@ -859,6 +868,7 @@ class DbManager extends BaseManager
      */
     public function addMenuChild($parent, $child)
     {
+        $a=microtime();
         if(!$parent || !$child){
             throw new InvalidParamException('parent or child can not is null.');
         }
@@ -878,14 +888,13 @@ class DbManager extends BaseManager
         $this->db->createCommand()
             ->insert($this->menuChildTable, ['parent' => $parent->name, 'child' => $child->name])
             ->execute();
-
         //当菜单添加子菜单后，就变更为下拉菜单
         if($child instanceof Navigation){
             $parent->style = Menu::TYPE_MENU_DOWN;
             $parent->url = '';
             $this->updateMenu($parent->name,$parent);
         }
-        $this->invalidateCache();
+        $this->invalidateCache(['menulist']);
 
         return true;
     }
@@ -899,7 +908,7 @@ class DbManager extends BaseManager
             ->delete($this->itemChildTable, ['parent' => $parent->name, 'child' => $child->name])
             ->execute() > 0;
 
-        $this->invalidateCache();
+        $this->invalidateCache(['parent']);
 
         return $result;
     }
@@ -913,7 +922,7 @@ class DbManager extends BaseManager
             ->delete($this->menuChildTable, ['parent' => $parent->name, 'child' => $child->name])
             ->execute() > 0;
 
-        $this->invalidateCache();
+        $this->invalidateCache(['menulist']);
 
         return $result;
     }
@@ -927,7 +936,7 @@ class DbManager extends BaseManager
             ->delete($this->itemChildTable, ['parent' => $parent->name])
             ->execute() > 0;
 
-        $this->invalidateCache();
+        $this->invalidateCache(['parent']);
 
         return $result;
     }
@@ -941,7 +950,7 @@ class DbManager extends BaseManager
             ->delete($this->menuChildTable, ['parent' => $parent->name])
             ->execute() > 0;
 
-        $this->invalidateCache();
+        $this->invalidateCache(['menulist']);
 
         return $result;
     }
@@ -974,7 +983,7 @@ class DbManager extends BaseManager
     public function getChildren($name)
     {
         $query = (new Query)
-            ->select(['name', 'type', 'description', 'rule_name', 'data', 'created_at', 'updated_at'])
+            ->select(['name', 'type', 'description', 'rule_name', 'data', 'created_at', 'updated_at', 'app_name'])
             ->from([$this->itemTable, $this->itemChildTable])
             ->where(['parent' => $name, 'name' => new Expression('[[child]]')]);
 
@@ -1094,7 +1103,7 @@ class DbManager extends BaseManager
         $this->db->createCommand()->delete($this->itemChildTable)->execute();
         $this->db->createCommand()->delete($this->itemTable)->execute();
         $this->db->createCommand()->delete($this->ruleTable)->execute();
-        $this->invalidateCache();
+        $this->invalidateCache(['itme','rule','parent']);
     }
 
     /**
@@ -1140,7 +1149,7 @@ class DbManager extends BaseManager
             ->delete($this->itemTable, ['type' => $type])
             ->execute();
 
-        $this->invalidateCache();
+        $this->invalidateCache(['item']);
     }
 
     /**
@@ -1156,7 +1165,7 @@ class DbManager extends BaseManager
 
         $this->db->createCommand()->delete($this->ruleTable)->execute();
 
-        $this->invalidateCache();
+        $this->invalidateCache(['item','rule']);
     }
 
     /**
@@ -1167,51 +1176,131 @@ class DbManager extends BaseManager
         $this->db->createCommand()->delete($this->assignmentTable)->execute();
     }
 
-    public function invalidateCache()
+    public function invalidateCache($params=[])
     {
         if ($this->cache !== null) {
-            $this->cache->delete($this->cacheKey);
-            $this->items = null;
-            $this->rules = null;
-            $this->parents = null;
-            $this->applications=null;
-            $this->menus=null;
+            if(!empty($params)){
+                $data=$this->cache->get($this->cacheKey);
+                foreach ($params as $key => $value) {
+                    switch ($value) {
+                        case 'item':
+                            $this->items = null;
+                            $this->parents = null;
+                            if(isset($data['items']) || isset($data['parents'])){
+                                if(isset($data['items'])){
+                                    unset($data['items']);
+                                }
+                                if(isset($data['parents'])){
+                                    unset($data['parents']);
+                                }
+                            }
+                            break;
+                        case 'rule':
+                            $this->rules = null;
+                            if(isset($data['rules'])){
+                                unset($data['rules']);
+                            }
+                            break;
+                        case 'parent':
+                            $this->parents = null;
+                            if(isset($data['parents'])){
+                                unset($data['parents']);
+                            }
+                            break;
+                        case 'application':
+                            $this->applications=null;
+                            if(isset($data['applications'])){
+                                unset($data['applications']);
+                            }
+                            break;
+                        case 'menu':
+                            $this->menus=null;
+                            if(isset($data['menus'])){
+                                unset($data['menus']);
+                            }
+                            break;
+                        case 'menulist':
+                            $this->menulist=null;
+                            if(isset($data['menulist'])){
+                                unset($data['menulist']);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                $this->cache->set($this->cacheKey, $data);
+            }else{
+                $this->cache->delete($this->cacheKey);
+                $this->items = null;
+                $this->rules = null;
+                $this->parents = null;
+                $this->applications=null;
+                $this->menus=null;
+                $this->menulist=null;
+            }
         }
     }
 
     public function loadFromCache()
     {
-        if ($this->items !== null || !$this->cache instanceof Cache) {
+        if (($this->items !== null && $this->menus !== null && $this->applications !== null && $this->rules !== null && $this->parents !== null && $this->menulist !== null) || !$this->cache instanceof Cache) {
             return;
         }
 
         $data = $this->cache->get($this->cacheKey);
-        if (is_array($data) && isset($data[0], $data[1], $data[2])) {
-            list ($this->items, $this->rules, $this->parents) = $data;
-            return;
+        
+        if($this->items === null){
+            $this->items = isset($data['items']) ? $data['items'] : $this->getItems();
         }
-
-        $query = (new Query)->from($this->itemTable)->where(['app_name' => $this->application->appName]);
-        $this->items = [];
-        foreach ($query->all($this->db) as $row) {
-            $this->items[$row['name']] = $this->populateItem($row);
+        
+        if($this->rules === null){
+            $this->rules = isset($data['rules']) ? $data['rules'] : $this->getRules();
         }
-
-        $query = (new Query)->from($this->ruleTable);
-        $this->rules = [];
-        foreach ($query->all($this->db) as $row) {
-            $this->rules[$row['name']] = unserialize($row['data']);
-        }
-
-        $query = (new Query)->from($this->itemChildTable);
-        $this->parents = [];
-        foreach ($query->all($this->db) as $row) {
-            if (isset($this->items[$row['child']])) {
-                $this->parents[$row['child']][] = $row['parent'];
+        
+        if($this->parents === null){
+            if(isset($data['parents'])){
+                $this->parents = $data['parents'];
+            }else{
+                $query = (new Query)->from($this->itemChildTable);
+                $this->parents = [];
+                foreach ($query->all($this->db) as $row) {
+                    if (isset($this->items[$row['child']])) {
+                        $this->parents[$row['child']][] = $row['parent'];
+                    }
+                }
             }
         }
 
-        $this->cache->set($this->cacheKey, [$this->items, $this->rules, $this->parents]);
+        if($this->applications === null){
+            $this->applications = isset($data['applications']) ? $data['applications'] : $this->getApplications();
+        }
+
+        if($this->menus === null){
+            $this->menus = isset($data['menus']) ? $data['menus'] : $this->getMenus();
+        }
+
+        if($this->menulist === null){
+            if(isset($data['menulist'])){
+                $this->menulist = $data['menulist'];
+            }else{
+                $this->menulist = [];
+                foreach ($this->getApplications() as $row) {
+                    $this->menulist[$row->name]=$this->getMenusByApplicationName($row->name);
+                }
+            }
+        }
+
+        $newdata=[
+            'items' => $this->items, 
+            'rules' => $this->rules, 
+            'parents' => $this->parents, 
+            'applications' => $this->applications, 
+            'menus' => $this->menus, 
+            'menulist' => $this->menulist
+        ];
+
+        $this->cache->set($this->cacheKey, $newdata);
     }
 
     /**
@@ -1253,7 +1342,7 @@ class DbManager extends BaseManager
                 'user_id' => $application->userId,
             ])->execute();
 
-        $this->invalidateCache();
+        $this->invalidateCache(['application']);
 
         return true;
     }
@@ -1274,7 +1363,7 @@ class DbManager extends BaseManager
                 ->execute();
         }
 
-        $rule->updatedAt = time();
+        $application->updatedAt = time();
 
         $this->db->createCommand()
             ->update($this->applicationTable, [
@@ -1285,7 +1374,7 @@ class DbManager extends BaseManager
                 'name' => $name,
             ])->execute();
 
-        $this->invalidateCache();
+        $this->invalidateCache();//应用变更，可能引起其他表变更
 
         return true;
     }
@@ -1309,7 +1398,7 @@ class DbManager extends BaseManager
             ->delete($this->applicationTable, ['name' => $application->name])
             ->execute();
 
-        $this->invalidateCache();
+        $this->invalidateCache();//应用删除，可能引起其他表删除
 
         return true;
     }
@@ -1318,7 +1407,7 @@ class DbManager extends BaseManager
      * 获取一个应用
      * @param $params array 参数
      */
-    protected function getApplication($params)
+    protected function getApplication($params=[])
     {
         if (empty($params)) {
             return null;
@@ -1342,8 +1431,11 @@ class DbManager extends BaseManager
     /**
      * 获取多个应用
      */
-    protected function getApplications($params)
+    protected function getApplications($params=[])
     {
+        if (empty($params) && $this->applications !== null) {
+            return $this->applications;
+        }
         $query = (new Query)
             ->from($this->applicationTable)
             ->where($params);
@@ -1382,7 +1474,7 @@ class DbManager extends BaseManager
                 'app_name' => $menu->appName,
             ])->execute();
 
-        $this->invalidateCache();
+        $this->invalidateCache(['menu','menulist']);
 
         return true;
     }
@@ -1399,7 +1491,7 @@ class DbManager extends BaseManager
                 ->update($this->menuChildTable, ['parent' => $menu->name], ['parent' => $name])
                 ->execute();
             $this->db->createCommand()
-                ->update($this->itemChildTable, ['child' => $menu->name], ['child' => $name])
+                ->update($this->menuChildTable, ['child' => $menu->name], ['child' => $name])
                 ->execute();
         }
         $menu->updatedAt = time();
@@ -1417,7 +1509,7 @@ class DbManager extends BaseManager
                 'name' => $name,
             ])->execute();
 
-        $this->invalidateCache();
+        $this->invalidateCache(['menu','menulist']);
 
         return true;
     }
@@ -1437,7 +1529,7 @@ class DbManager extends BaseManager
             ->delete($this->menuTable, ['name' => $menu->name])
             ->execute();
 
-        $this->invalidateCache();
+        $this->invalidateCache(['menu','menulist']);
 
         return true;
     }
@@ -1447,7 +1539,7 @@ class DbManager extends BaseManager
     /**
      * @inheritdoc
      */
-    protected function getMenu($params)
+    protected function getMenu($params=[])
     {
         if (empty($params['name'])) {
             return null;
@@ -1472,8 +1564,12 @@ class DbManager extends BaseManager
     /**
      * @inheritdoc
      */
-    protected function getMenus($params)
+    protected function getMenus($params=[])
     {
+        if (empty($params) && $this->menus !== null) {
+            return $this->menus;
+        }
+
         $query = (new Query)
             ->from($this->menuTable)
             ->where($params);
@@ -1516,6 +1612,9 @@ class DbManager extends BaseManager
      */
     protected function getMenusByApplicationName($appName)
     {
+        // if(isset($this->menulist[$appName])){
+        //     return $this->menulist[$appName];
+        // }
         $menus=$this->getMenus([
             'app_name' => $appName,
             'type' => Menu::TYPE_NAVIGATION,
