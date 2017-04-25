@@ -8,7 +8,7 @@
                     <ul id="formsub">
                     <?php if(isset($row1['childlist'])){?>
                         <?php foreach($row1['childlist'] as $row2){?>
-                            <li><a href="forms.html"><?= $row2['self']->description ?></a></li>
+                            <li><a href="<?= $row2['self']->url ?>"><?= $row2['self']->description ?></a></li>
                         <?php } ?>
                     <?php } ?>
                     </ul>

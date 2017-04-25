@@ -252,6 +252,8 @@ abstract class BaseManager extends Component implements ManagerInterface
         $navigation->name = $name;
         $navigation->appName=$appName;
         $navigation->url='';
+        $navigation->pic='';
+        $navigation->sort=1;
         return $navigation;
     }
 
@@ -261,6 +263,8 @@ abstract class BaseManager extends Component implements ManagerInterface
         $operate->name = $name;
         $operate->appName=$appName;
         $operate->url='';
+        $operate->pic='';
+        $operate->sort=1;
         return $operate;
     }
 

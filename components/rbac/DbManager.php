@@ -560,7 +560,9 @@ class DbManager extends BaseManager
             'type' => $row['type'],
             'style' => $row['style'],
             'url' => $row['url'],
+            'pic' => $row['pic'],
             'description' => $row['description'],
+            'sort' => $row['sort'],
             'createdAt' => $row['created_at'],
             'updatedAt' => $row['updated_at'],
             'appName' => $row['app_name'],
@@ -891,7 +893,6 @@ class DbManager extends BaseManager
         //当菜单添加子菜单后，就变更为下拉菜单
         if($child instanceof Navigation){
             $parent->style = Menu::TYPE_MENU_DOWN;
-            $parent->url = '';
             $this->updateMenu($parent->name,$parent);
         }
         $this->invalidateCache(['menulist']);
@@ -921,7 +922,9 @@ class DbManager extends BaseManager
         $result = $this->db->createCommand()
             ->delete($this->menuChildTable, ['parent' => $parent->name, 'child' => $child->name])
             ->execute() > 0;
-
+        /**
+         * @todo:当菜单不再含有子菜单的时候，需要将菜单类型改为跳转菜单
+         */
         $this->invalidateCache(['menulist']);
 
         return $result;
@@ -1001,7 +1004,7 @@ class DbManager extends BaseManager
     public function getMenuChildren($name)
     {
         $query = (new Query)
-            ->select(['name', 'type', 'style', 'url', 'description', 'created_at', 'updated_at', 'app_name'])
+            ->select(['name', 'type', 'style', 'url', 'pic', 'description', 'sort', 'created_at', 'updated_at', 'app_name'])
             ->from([$this->menuTable, $this->menuChildTable])
             ->where(['parent' => $name, 'name' => new Expression('[[child]]')]);
 
@@ -1468,7 +1471,9 @@ class DbManager extends BaseManager
                 'type' => $menu->type,
                 'style' => $menu->style,
                 'url' => $menu->url,
+                'pic' => $menu->pic,
                 'description' => $menu->description,
+                'sort' => $menu->sort,
                 'created_at' => $menu->createdAt,
                 'updated_at' => $menu->updatedAt,
                 'app_name' => $menu->appName,
@@ -1502,7 +1507,9 @@ class DbManager extends BaseManager
                 'type' => $menu->type,
                 'style' => $menu->style,
                 'url' => $menu->url,
+                'pic' => $menu->pic,
                 'description' => $menu->description,
+                'sort' => $menu->sort,
                 'updated_at' => $menu->updatedAt,
                 'app_name' => $menu->appName,
             ], [
@@ -1551,6 +1558,7 @@ class DbManager extends BaseManager
 
         $row = (new Query)->from($this->menuTable)
             ->where($params)
+            ->orderBy(['sort' => SORT_DESC])
             ->one($this->db);
 
         if ($row === false) {
@@ -1572,7 +1580,8 @@ class DbManager extends BaseManager
 
         $query = (new Query)
             ->from($this->menuTable)
-            ->where($params);
+            ->where($params)
+            ->orderBy(['sort' => SORT_DESC]);
 
         $menus = [];
         foreach ($query->all($this->db) as $row) {

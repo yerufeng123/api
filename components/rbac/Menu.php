@@ -39,13 +39,21 @@ class Menu extends Object
      */
     public $style;
     /**
-     * @var int 跳转链接
+     * @var string 跳转链接
      */
     public $url;
+    /**
+     * @var string icon图片地址
+     */
+    public $pic;
     /**
      * @var string 菜单描述
      */
     public $description;
+    /**
+     * @var int 排序数，倒序排列
+     */
+    public $sort;
     /**
      * @var int UNIX timestamp 创建时间
      */

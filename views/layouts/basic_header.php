@@ -56,7 +56,7 @@
         <div class="header">
             <ul class="headermenu">
                 <?php foreach ($this->params['menulist'] as $key => $value) {?>
-                    <li class=""><a href="dashboard.html"><span class="icon icon-flatscreen"></span><?= $value['self']->description ?></a></li>
+                    <li class=""><a href="<?= $value['self']->url?>"><span class="icon icon-flatscreen"></span><?= $value['self']->description ?></a></li>
                 <?php } ?>
             </ul>
             

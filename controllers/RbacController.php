@@ -12,6 +12,13 @@ class RbacController extends BaseController
     public $auth=null;
     public $menulist=null;
 
+    public function actions()
+    {
+        return [
+            'app_add' => 'app\controllers\actions\rbac\ApplicationAddAction',//新增应用
+        ];
+    }
+
     public function init(){
         if(!$this->auth){
             $this->auth=Yii::$app->authManager;
@@ -35,7 +42,19 @@ class RbacController extends BaseController
         //echo Yii::$app->controller->id;
         //echo Yii::$app->controller->module->id;
         //echo Yii::$app->controller->action->id;die;
-        //$application=$this->auth->getApplicationByname('admin_api');
+        $application=$this->auth->getApplicationByname('admin_api');
+        $menu=$this->auth->getNavigation('admin_api_basic_rbac_myauth');
+        //$menu->url='/rbac/app_add';
+        //$menu->description='新增应用';
+        //$this->auth->update('admin_api_basic_rbac_application_add',$menu);
+        $menu02=$this->auth->getNavigation('admin_api_basic_rbac_myauth_myauth');
+        //$menu02->url='/rbac/myauth_myauth';
+        //$menu02->description='我的权限';
+        //$this->auth->update('admin_api_basic_rbac_myauth_myauth',$menu02);die;
+        //$menu02=$this->auth->getNavigation('admin_api_basic_rbac_myauth_approve');
+        //$menu02=$this->auth->addMenuChild($menu,$menu02);
+        //$this->auth->addMenuChild($menu,$menu02);
+
         //$application->name='admin_api';
         //$this->auth->update('admin_api_header',$application);die;
         //$menu=$this->auth->getNavigation('admin_api'.Yii::$app->controller->module->id.Yii::$app->controller->id.'myauth');
@@ -63,28 +82,28 @@ class RbacController extends BaseController
      *导航——权限使用人
      */
     public function actionMyauth(){
-
+        return $this->render('myauth');
     }
 
     /**
      *导航——应用管理员
      */
     public function actionAppadmin(){
-
+        return $this->render('myauth');
     }
 
     /**
      *导航——权限管理员
      */
     public function actionAuthadmin(){
-
+        return $this->render('myauth');
     }
 
     /**
      *导航——角色管理员
      */
     public function actionRoleadmin(){
-
+        return $this->render('myauth');
     }
 
     /**
