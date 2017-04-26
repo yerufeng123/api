@@ -316,10 +316,13 @@ class DbManager extends BaseManager
                 'name' => $item->name,
                 'type' => $item->type,
                 'description' => $item->description,
-                'rule_name' => $item->ruleName,
+                'private' => $item->private,
+                'status' => $item->status,
+                'danger' => $item->danger,
                 'data' => $item->data === null ? null : serialize($item->data),
                 'created_at' => $item->createdAt,
                 'updated_at' => $item->updatedAt,
+                'rule_name' => $item->ruleName,
                 'app_name' => $item->appName,
             ])->execute();
 
@@ -374,9 +377,12 @@ class DbManager extends BaseManager
             ->update($this->itemTable, [
                 'name' => $item->name,
                 'description' => $item->description,
-                'rule_name' => $item->ruleName,
+                'private' => $item->private,
+                'status' => $item->status,
+                'danger' => $item->danger,
                 'data' => $item->data === null ? null : serialize($item->data),
                 'updated_at' => $item->updatedAt,
+                'rule_name' => $item->ruleName,
                 'app_name' => $item->appName,
             ], [
                 'name' => $name,
@@ -523,10 +529,13 @@ class DbManager extends BaseManager
             'name' => $row['name'],
             'type' => $row['type'],
             'description' => $row['description'],
-            'ruleName' => $row['rule_name'],
+            'private' => $row['private'],
+            'status' => $row['status'],
+            'danger' => $row['danger'],
             'data' => $data,
             'createdAt' => $row['created_at'],
             'updatedAt' => $row['updated_at'],
+            'ruleName' => $row['rule_name'],
             'appName' => $row['app_name'],
         ]);
     }
@@ -986,7 +995,7 @@ class DbManager extends BaseManager
     public function getChildren($name)
     {
         $query = (new Query)
-            ->select(['name', 'type', 'description', 'rule_name', 'data', 'created_at', 'updated_at', 'app_name'])
+            ->select(['name', 'type', 'description', 'private', 'status', 'danger', 'rule_name', 'data', 'created_at', 'updated_at', 'app_name'])
             ->from([$this->itemTable, $this->itemChildTable])
             ->where(['parent' => $name, 'name' => new Expression('[[child]]')]);
 

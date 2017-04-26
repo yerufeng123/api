@@ -55,9 +55,7 @@
         
         <div class="header">
             <ul class="headermenu">
-                <?php foreach ($this->params['menulist'] as $key => $value) {?>
-                    <li class=""><a href="<?= $value['self']->url?>"><span class="icon icon-flatscreen"></span><?= $value['self']->description ?></a></li>
-                <?php } ?>
+                <li class="current"><a href="/rbac/auth"><span class="icon icon-flatscreen"></span>权限系统</a></li>
             </ul>
             
            <div class="headerwidget">

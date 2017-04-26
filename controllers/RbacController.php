@@ -9,6 +9,7 @@ use app\helpers\ToolsHelper;
 class RbacController extends BaseController
 {
     public $layout = 'basic_nav1';
+    public $appname = 'admin_rbac';
     public $auth=null;
     public $menulist=null;
 
@@ -26,28 +27,26 @@ class RbacController extends BaseController
         }
         
         if($this->menulist === null){
-            $application=$this->auth->getApplicationByname('admin_api');
+            $application=$this->auth->getApplicationByname($this->appname);
             $this->menulist=$this->auth->getMenuList($application);
             $view = Yii::$app->view;  
-            $view->params['menulist']=$this->menulist; 
-            $view->params['act']=ToolsHelper::getYP('act');
+            $view->params['menulist']=$this->menulist;
         }
     }
 
     public function actionInit()
     {
         $userId=1;
-        //$this->auth->invalidateCache();die;
-        //创建一个菜单
-        //echo Yii::$app->controller->id;
-        //echo Yii::$app->controller->module->id;
-        //echo Yii::$app->controller->action->id;die;
-        $application=$this->auth->getApplicationByname('admin_api');
-        $menu=$this->auth->getNavigation('admin_api_basic_rbac_myauth');
+        $application=$this->auth->getApplicationByname($this->appname);
+        $menu=$this->auth->getNavigation('admin_rbac_basic_rbac_auth');
+        //$menu->url='/rbac/role';
+        //$menu->pic='editor';
+        $menu->sort=3;
+        $this->auth->update('admin_rbac_basic_rbac_auth',$menu);die;
+
         //$menu->url='/rbac/app_add';
         //$menu->description='新增应用';
         //$this->auth->update('admin_api_basic_rbac_application_add',$menu);
-        $menu02=$this->auth->getNavigation('admin_api_basic_rbac_myauth_myauth');
         //$menu02->url='/rbac/myauth_myauth';
         //$menu02->description='我的权限';
         //$this->auth->update('admin_api_basic_rbac_myauth_myauth',$menu02);die;
@@ -79,51 +78,30 @@ class RbacController extends BaseController
     }
 
     /**
-     *导航——权限使用人
+     *导航——权限管理
      */
-    public function actionMyauth(){
-        return $this->render('myauth');
-    }
-
-    /**
-     *导航——应用管理员
-     */
-    public function actionAppadmin(){
-        return $this->render('myauth');
-    }
-
-    /**
-     *导航——权限管理员
-     */
-    public function actionAuthadmin(){
-        return $this->render('myauth');
-    }
-
-    /**
-     *导航——角色管理员
-     */
-    public function actionRoleadmin(){
+    public function actionAuth(){
         return $this->render('myauth');
     }
 
     /**
      *导航——应用管理
      */
-    public function actionApplication(){
-
-    }
-
-    /**
-     *导航——角色管理
-     */
-    public function actionRole(){
-
+    public function actionApp(){
+        return $this->render('myauth');
     }
 
     /**
      *导航——菜单管理
      */
     public function actionMenu(){
+        return $this->render('myauth');
+    }
 
+    /**
+     *导航——角色管理
+     */
+    public function actionRole(){
+        return $this->render('myauth');
     }
 }

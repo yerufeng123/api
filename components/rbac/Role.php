@@ -20,4 +20,7 @@ class Role extends Item
      * @inheritdoc
      */
     public $type = self::TYPE_ROLE;
+    public $private = self::PRIVATE_ALLOW;
+    public $status = self::STATUS_ENABLE;
+    public $danger = self::DANGER_HIGH;
 }
