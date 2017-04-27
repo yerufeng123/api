@@ -21,12 +21,12 @@ class RbacController extends BaseController
     }
 
     public function init(){
-        if(!$this->auth){
+        if(!$this->auth && !Yii::$app->request->isAjax){
             $this->auth=Yii::$app->authManager;
             $this->auth->loadFromCache();
         }
         
-        if($this->menulist === null){
+        if($this->menulist === null && !Yii::$app->request->isAjax){
             $application=$this->auth->getApplicationByname($this->appname);
             $this->menulist=$this->auth->getMenuList($application);
             $view = Yii::$app->view;  
@@ -36,36 +36,7 @@ class RbacController extends BaseController
 
     public function actionInit()
     {
-        $userId=1;
-        $application=$this->auth->getApplicationByname($this->appname);
-        $menu=$this->auth->getNavigation('admin_rbac_basic_rbac_auth');
-        //$menu->url='/rbac/role';
-        //$menu->pic='editor';
-        $menu->sort=3;
-        $this->auth->update('admin_rbac_basic_rbac_auth',$menu);die;
-
-        //$menu->url='/rbac/app_add';
-        //$menu->description='新增应用';
-        //$this->auth->update('admin_api_basic_rbac_application_add',$menu);
-        //$menu02->url='/rbac/myauth_myauth';
-        //$menu02->description='我的权限';
-        //$this->auth->update('admin_api_basic_rbac_myauth_myauth',$menu02);die;
-        //$menu02=$this->auth->getNavigation('admin_api_basic_rbac_myauth_approve');
-        //$menu02=$this->auth->addMenuChild($menu,$menu02);
-        //$this->auth->addMenuChild($menu,$menu02);
-
-        //$application->name='admin_api';
-        //$this->auth->update('admin_api_header',$application);die;
-        //$menu=$this->auth->getNavigation('admin_api'.Yii::$app->controller->module->id.Yii::$app->controller->id.'myauth');
-        //$this->auth->remove($menu);die;
-         //$menu01=$this->auth->getNavigation('admin_api_basic_rbac_application');
-         //$menu=$this->auth->createNavigation('admin_api'.'_'.Yii::$app->controller->module->id.'_'.Yii::$app->controller->id.'_'.'application_add',$application->name);
-         //$menu->description='新增管理';
-         //$this->auth->add($menu);
-         //$this->auth->addMenuChild($menu01,$menu);
-        //$response=Yii::$app->response;
-        //$response->format=Response::FORMAT_JSON;
-        //return $response->data=$this->auth->getMenuList($application);
+        
         return $this->render('myauth');
         
     }
@@ -88,7 +59,7 @@ class RbacController extends BaseController
      *导航——应用管理
      */
     public function actionApp(){
-        return $this->render('myauth');
+        return $this->renderAjax('appview');
     }
 
     /**

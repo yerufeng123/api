@@ -13,6 +13,7 @@ use app\helpers\ToolsHelper;
 
 class SiteController extends BaseController
 {
+    public $layout = 'main';
     /**
      * @inheritdoc
      */

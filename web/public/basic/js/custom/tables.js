@@ -131,14 +131,16 @@ jQuery(document).ready(function(){
 		"sPaginationType": "full_numbers",
 		"aaSortingFixed": [[0,'asc']],
 		"fnDrawCallback": function(oSettings) {
-            jQuery('input:checkbox,input:radio').uniform();
+            jQuery('input:checkbox').parent().parent().not('.checker').find('input:checkbox').uniform();
+            jQuery('input:radio').uniform();
 			//jQuery.uniform.update();
         }
 	});
 
 	
 	///// TRANSFORM CHECKBOX AND RADIO BOX USING UNIFORM PLUGIN /////
-	jQuery('input:checkbox,input:radio').uniform();
+	jQuery('input:checkbox').parent().parent().not('.checker').find('input:checkbox').uniform();
+	jQuery('input:radio').uniform();
 	
 	
 });

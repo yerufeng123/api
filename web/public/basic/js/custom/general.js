@@ -357,6 +357,28 @@ jQuery(document).ready(function(){
 			jQuery.cookie("addonstyle", c, { path: '/' });
 		}
 	}
+
+	jQuery('.menu1,.menu2').each(function(){
+		var url=jQuery(this).attr('link');
+		var data={};
+		jQuery(this).click(function(){
+			jQuery(this).parent().addClass('current');
+			jQuery(this).parent().siblings('li').removeClass('current');
+			if(url){
+				jQuery.ajax({
+				   type: "GET",
+				   url: url,
+				   data: data,
+				   dataType:'html',
+				   timeout:1000,
+				   success: function(html){
+				     jQuery('.content-box').html(html);
+				   }
+				});
+				return false;
+			}
+		});
+	});
 	
 	
 

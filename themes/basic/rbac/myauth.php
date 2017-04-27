@@ -2,7 +2,7 @@
     $this->title='权限后台管理系统';
     $this->registerJsFile("@basic/js/plugins/excanvas.min.js",['condition' => 'lte IE8']); 
     $this->registerJsFile("@basic/js/plugins/css3-mediaqueries.js",['condition' => 'lt IE9']); 
-    $this->registerJsFile("@web/public/basic/js/custom/dashboard.js"); 
+    $this->registerJsFile("@basic/js/custom/dashboard.js"); 
 ?>
 <div class="centercontent">
 
