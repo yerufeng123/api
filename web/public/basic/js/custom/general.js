@@ -370,7 +370,7 @@ jQuery(document).ready(function(){
 				   url: url,
 				   data: data,
 				   dataType:'html',
-				   timeout:1000,
+				   timeout:5000,
 				   success: function(html){
 				     jQuery('.content-box').html(html);
 				   }
