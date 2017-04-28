@@ -21,9 +21,11 @@ class RbacController extends BaseController
     }
 
     public function init(){
-        if(!$this->auth && !Yii::$app->request->isAjax){
+        if(!$this->auth){
             $this->auth=Yii::$app->authManager;
-            $this->auth->loadFromCache();
+            if(!Yii::$app->request->isAjax){
+                $this->auth->loadFromCache();
+            }
         }
         
         if($this->menulist === null && !Yii::$app->request->isAjax){
@@ -59,7 +61,12 @@ class RbacController extends BaseController
      *导航——应用管理
      */
     public function actionApp(){
-        return $this->renderAjax('appview');
+        $userId=1;
+        /**
+         *@todo:判断当前用户角色是否是超级管理员,如果是要返回全部的应用列表
+         */
+        $data['applist']=$this->auth->getApplicationsByUser($userId);
+        return $this->renderAjax('appview',['data' => $data]);
     }
 
     /**
