@@ -142,5 +142,4 @@ jQuery(document).ready(function(){
 	jQuery('input:checkbox').parent().parent().not('.checker').find('input:checkbox').uniform();
 	jQuery('input:radio').uniform();
 	
-	
 });

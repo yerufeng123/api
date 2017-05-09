@@ -41,10 +41,10 @@ class BackgroundAsset extends AssetBundle
         'js/plugins/jquery.flot.min.js',
         'js/plugins/jquery.flot.resize.min.js',
         'js/plugins/jquery.slimscroll.js',
-        
         'js/custom/general.js',
     ];
     public $depends = [
+        'yii\bootstrap\BootstrapPluginAsset',
     ];
     public $jsOptions = ['position' => \yii\web\View::POS_HEAD];
 }
