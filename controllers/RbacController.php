@@ -73,13 +73,13 @@ class RbacController extends BaseController
      *导航——菜单管理
      */
     public function actionMenu(){
-        return $this->render('myauth');
+        return $this->renderAjax('myauth');
     }
 
     /**
      *导航——角色管理
      */
     public function actionRole(){
-        return $this->render('myauth');
+        return $this->renderAjax('myauth');
     }
 }
