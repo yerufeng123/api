@@ -43,7 +43,7 @@ return [
     ],
     // Asset manager configuration:
     'assetManager' => [
-        'basePath' => '@webroot/public/basic',
+        'basePath' => '@webroot/assets',
         'baseUrl' => '',
     ],
 ];

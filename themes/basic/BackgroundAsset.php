@@ -44,7 +44,7 @@ class BackgroundAsset extends AssetBundle
         'js/custom/general.js',
     ];
     public $depends = [
-        'yii\bootstrap\BootstrapPluginAsset',
+        'app\assets\BootstrapPluginAsset',
     ];
     public $jsOptions = ['position' => \yii\web\View::POS_HEAD];
 }
