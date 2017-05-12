@@ -20,7 +20,7 @@ class BootstrapPluginAsset extends AssetBundle
     public $basePath = '@webroot/public/basic';
     public $baseUrl = '@web/public/basic';
     public $js = [
-    	'js/plugins/jquery.js',
+    	'js/plugins/jquery-2.1.1.min.js',
         'js/plugins/bootstrap.js',
     ];
     public $depends = [

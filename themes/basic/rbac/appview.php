@@ -14,6 +14,9 @@
     <div id="contentwrapper" class="contentwrapper">   
         <div class="contenttitle2">
             <h3>我管理的应用列表</h3>
+            <p>
+                <button type="button" class="btn btn-default">新增应用</button>
+            </p>
         </div><!--contenttitle-->
         <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
             <colgroup>
